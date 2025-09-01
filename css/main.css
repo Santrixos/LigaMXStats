@@ -183,8 +183,30 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: 1;
+}
+
+.slide-background.estadio-azteca {
+    background-image: linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+}
+
+.slide-background.estadio-bbva {
+    background-image: linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+}
+
+.slide-background.estadio-jalisco {
+    background-image: linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+}
+
+.slide-background.estadio-universitario {
+    background-image: linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+}
+
+.slide-background.estadio-corona {
+    background-image: linear-gradient(rgba(26, 26, 26, 0.7), rgba(26, 26, 26, 0.7)), url('https://images.unsplash.com/photo-1459865264687-595d652de67e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
 .gradient-overlay {
@@ -224,39 +246,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* Carousel Navigation */
-.carousel-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 4;
-}
-
-.carousel-btn {
-    background: rgba(255, 153, 51, 0.8);
-    border: none;
-    color: white;
-    font-size: 2rem;
-    padding: 1rem 1.5rem;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.carousel-btn:hover {
-    background: #ff9933;
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(255, 153, 51, 0.4);
-}
-
-.carousel-btn.prev {
-    left: 2rem;
-}
-
-.carousel-btn.next {
-    right: 2rem;
-}
 
 /* Carousel Indicators */
 .carousel-indicators {

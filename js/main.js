@@ -376,8 +376,6 @@ function filterTeamsByRegion(region, teams = teamsData) {
 function setupCarousel() {
     const slides = document.querySelectorAll('.carousel-slide');
     const indicators = document.querySelectorAll('.indicator');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
     
     let currentSlide = 0;
     let isTransitioning = false;
@@ -432,9 +430,7 @@ function setupCarousel() {
         showSlide(prevIndex);
     }
     
-    // Event listeners
-    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    // Event listeners removed - buttons no longer exist
     
     indicators.forEach((indicator, index) => {
         indicator.addEventListener('click', () => showSlide(index));
