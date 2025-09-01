@@ -1,4 +1,4 @@
-// Main JavaScript file for Liga MX website
+// Main JavaScript file for UltraGol website by L3HO
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
@@ -11,10 +11,12 @@ let fixturesData = [];
 // Initialize the application
 function initializeApp() {
     setupNavigation();
+    setupCarousel();
     setupScrollAnimations();
     loadInitialData();
     setupCounterAnimations();
     setupThemeSystem();
+    setupAdvancedFeatures();
 }
 
 // Navigation functionality
@@ -370,8 +372,207 @@ function filterTeamsByRegion(region, teams = teamsData) {
     return teams.filter(team => team.region === region);
 }
 
+// Advanced Carousel System
+function setupCarousel() {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicators = document.querySelectorAll('.indicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    let currentSlide = 0;
+    let isTransitioning = false;
+    let autoSlideInterval;
+    
+    // Auto-slide functionality
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(() => {
+            nextSlide();
+        }, 5000); // Change slide every 5 seconds
+    }
+    
+    function stopAutoSlide() {
+        clearInterval(autoSlideInterval);
+    }
+    
+    function showSlide(index) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        // Remove active class from all slides and indicators
+        slides.forEach(slide => {
+            slide.classList.remove('active', 'prev');
+        });
+        indicators.forEach(indicator => {
+            indicator.classList.remove('active');
+        });
+        
+        // Set previous slide
+        if (slides[currentSlide]) {
+            slides[currentSlide].classList.add('prev');
+        }
+        
+        // Update current slide
+        currentSlide = index;
+        
+        // Show new slide
+        setTimeout(() => {
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+            isTransitioning = false;
+        }, 100);
+    }
+    
+    function nextSlide() {
+        const nextIndex = (currentSlide + 1) % slides.length;
+        showSlide(nextIndex);
+    }
+    
+    function prevSlide() {
+        const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(prevIndex);
+    }
+    
+    // Event listeners
+    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => showSlide(index));
+    });
+    
+    // Pause auto-slide on hover
+    const carousel = document.querySelector('.hero-carousel');
+    if (carousel) {
+        carousel.addEventListener('mouseenter', stopAutoSlide);
+        carousel.addEventListener('mouseleave', startAutoSlide);
+        
+        // Touch/swipe support for mobile
+        let startX = 0;
+        let endX = 0;
+        
+        carousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+        
+        carousel.addEventListener('touchend', (e) => {
+            endX = e.changedTouches[0].clientX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const threshold = 50;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+    }
+    
+    // Start auto-slide
+    startAutoSlide();
+}
+
+// Advanced Features Setup
+function setupAdvancedFeatures() {
+    setupSearchFunctionality();
+    setupFilterSystem();
+    setupRealTimeUpdates();
+    setupDataVisualization();
+}
+
+// Enhanced Search Functionality
+function setupSearchFunctionality() {
+    const searchInput = document.getElementById('globalSearch');
+    if (!searchInput) return;
+    
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performGlobalSearch(e.target.value);
+        }, 300);
+    });
+}
+
+function performGlobalSearch(query) {
+    if (!query) return;
+    
+    const results = {
+        teams: searchTeams(query),
+        matches: searchMatches(query),
+        players: searchPlayers(query)
+    };
+    
+    displaySearchResults(results);
+}
+
+function searchMatches(query) {
+    return fixturesData.filter(match => 
+        match.homeTeam.toLowerCase().includes(query.toLowerCase()) ||
+        match.awayTeam.toLowerCase().includes(query.toLowerCase())
+    );
+}
+
+function searchPlayers(query) {
+    // This would search through player data when available
+    return [];
+}
+
+// Advanced Filter System
+function setupFilterSystem() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const filterType = e.target.dataset.filter;
+            const filterValue = e.target.dataset.value;
+            applyFilter(filterType, filterValue);
+        });
+    });
+}
+
+function applyFilter(type, value) {
+    let filteredData;
+    
+    switch(type) {
+        case 'region':
+            filteredData = filterTeamsByRegion(value);
+            break;
+        case 'status':
+            filteredData = filterMatchesByStatus(value);
+            break;
+        default:
+            return;
+    }
+    
+    updateDisplayedData(filteredData, type);
+}
+
+// Enhanced Team Comparison
+function compareTeams(team1Id, team2Id) {
+    const team1 = standingsData.find(t => t.id === team1Id);
+    const team2 = standingsData.find(t => t.id === team2Id);
+    
+    if (!team1 || !team2) return null;
+    
+    return {
+        team1: team1,
+        team2: team2,
+        comparison: {
+            pointsDiff: team1.points - team2.points,
+            winsDiff: team1.wins - team2.wins,
+            goalsDiff: (team1.goalsFor - team1.goalsAgainst) - (team2.goalsFor - team2.goalsAgainst)
+        }
+    };
+}
+
 // Export functions for use in other files
-window.ligaMXApp = {
+window.ultraGolApp = {
     teamsData: () => teamsData,
     standingsData: () => standingsData,
     fixturesData: () => fixturesData,
@@ -385,5 +586,8 @@ window.ligaMXApp = {
     getFromLocalStorage,
     searchTeams,
     filterTeamsByRegion,
-    applyTeamTheme
+    applyTeamTheme,
+    compareTeams,
+    performGlobalSearch,
+    setupCarousel
 };

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liga MX - Inicio</title>
+    <title>UltraGol - Plataforma Deportiva Profesional</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,8 +14,9 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="assets/logo.svg" alt="Liga MX" class="logo">
-                <span class="logo-text">Liga MX</span>
+                <img src="assets/logo.svg" alt="UltraGol" class="logo">
+                <span class="logo-text">UltraGol</span>
+                <span class="company-tag">by L3HO</span>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -39,20 +40,59 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title fade-in">Liga MX</h1>
-            <p class="hero-subtitle slide-up">El fútbol mexicano más emocionante</p>
-            <div class="hero-buttons">
-                <a href="standings.html" class="btn btn-primary">Ver Tabla</a>
-                <a href="teams.html" class="btn btn-secondary">Equipos</a>
+    <!-- Hero Carousel Section -->
+    <section class="hero-carousel">
+        <div class="carousel-container">
+            <div class="carousel-slides" id="heroCarousel">
+                <div class="carousel-slide active">
+                    <div class="slide-content">
+                        <h1 class="hero-title fade-in">UltraGol</h1>
+                        <p class="hero-subtitle slide-up">La plataforma deportiva más profesional</p>
+                        <div class="hero-buttons">
+                            <a href="standings.html" class="btn btn-primary">Explorar Liga</a>
+                            <a href="teams.html" class="btn btn-secondary">Ver Equipos</a>
+                        </div>
+                    </div>
+                    <div class="slide-background">
+                        <div class="gradient-overlay"></div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <h1 class="hero-title fade-in">Estadísticas Avanzadas</h1>
+                        <p class="hero-subtitle slide-up">Análisis profesional y datos en tiempo real</p>
+                        <div class="hero-buttons">
+                            <a href="standings.html" class="btn btn-primary">Ver Análisis</a>
+                            <a href="fixtures.html" class="btn btn-secondary">Resultados</a>
+                        </div>
+                    </div>
+                    <div class="slide-background">
+                        <div class="gradient-overlay"></div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <h1 class="hero-title fade-in">Experiencia Premium</h1>
+                        <p class="hero-subtitle slide-up">Diseño profesional by L3HO</p>
+                        <div class="hero-buttons">
+                            <a href="teams.html" class="btn btn-primary">Descubrir</a>
+                            <a href="fixtures.html" class="btn btn-secondary">Explorar</a>
+                        </div>
+                    </div>
+                    <div class="slide-background">
+                        <div class="gradient-overlay"></div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="hero-background">
-            <div class="floating-ball"></div>
-            <div class="floating-ball delay-1"></div>
-            <div class="floating-ball delay-2"></div>
+            <div class="carousel-nav">
+                <button class="carousel-btn prev" id="prevBtn">‹</button>
+                <button class="carousel-btn next" id="nextBtn">›</button>
+            </div>
+            <div class="carousel-indicators" id="carouselIndicators">
+                <span class="indicator active" data-slide="0"></span>
+                <span class="indicator" data-slide="1"></span>
+                <span class="indicator" data-slide="2"></span>
+            </div>
         </div>
     </section>
 
@@ -119,13 +159,157 @@
         </div>
     </section>
 
+    <!-- Advanced Search & Comparison -->
+    <section class="search-comparison">
+        <div class="container">
+            <h2 class="section-title">Búsqueda Avanzada & Comparación</h2>
+            <div class="search-tools">
+                <div class="search-bar">
+                    <input type="text" id="globalSearch" placeholder="Buscar equipos, jugadores, partidos..." class="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all" data-value="all">Todos</button>
+                    <button class="filter-btn" data-filter="region" data-value="norte">Norte</button>
+                    <button class="filter-btn" data-filter="region" data-value="centro">Centro</button>
+                    <button class="filter-btn" data-filter="region" data-value="sur">Sur</button>
+                </div>
+            </div>
+            <div class="comparison-tools">
+                <h3>Comparador de Equipos</h3>
+                <div class="team-selectors">
+                    <select id="team1Select" class="team-select">
+                        <option value="">Seleccionar Equipo 1</option>
+                    </select>
+                    <div class="vs-indicator">VS</div>
+                    <select id="team2Select" class="team-select">
+                        <option value="">Seleccionar Equipo 2</option>
+                    </select>
+                    <button id="compareBtn" class="btn btn-primary">Comparar</button>
+                </div>
+                <div id="comparisonResults" class="comparison-results"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Dashboard -->
+    <section class="analytics-dashboard">
+        <div class="container">
+            <h2 class="section-title">Analytics Profesional</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>Rendimiento de Liga</h3>
+                    <div id="leaguePerformance" class="chart-container">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Gráfico de rendimiento general</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <h3>Top Goleadores</h3>
+                    <div id="topScorers" class="scorers-list">
+                        <div class="scorer-item">
+                            <span class="position">1</span>
+                            <span class="name">Análisis Avanzado</span>
+                            <span class="goals">Disponible</span>
+                        </div>
+                        <div class="scorer-item">
+                            <span class="position">2</span>
+                            <span class="name">Estadísticas Pro</span>
+                            <span class="goals">En Tiempo Real</span>
+                        </div>
+                        <div class="scorer-item">
+                            <span class="position">3</span>
+                            <span class="name">Métricas Avanzadas</span>
+                            <span class="goals">Precisas</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <h3>Tendencias</h3>
+                    <div class="trends-container">
+                        <div class="trend-item">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span>Partidos Emocionantes +15%</span>
+                        </div>
+                        <div class="trend-item">
+                            <i class="fas fa-arrow-up trend-up"></i>
+                            <span>Goles por Partido +8%</span>
+                        </div>
+                        <div class="trend-item">
+                            <i class="fas fa-arrow-down trend-down"></i>
+                            <span>Tarjetas Rojas -12%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <h3>Próximos Destacados</h3>
+                    <div class="featured-matches">
+                        <div class="featured-match">
+                            <div class="match-teams">
+                                <span>Clásico Nacional</span>
+                            </div>
+                            <div class="match-info">
+                                <span class="date">Próximo Fin de Semana</span>
+                                <span class="importance">★★★★★</span>
+                            </div>
+                        </div>
+                        <div class="featured-match">
+                            <div class="match-teams">
+                                <span>Derby Regional</span>
+                            </div>
+                            <div class="match-info">
+                                <span class="date">Miércoles</span>
+                                <span class="importance">★★★★☆</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Insights -->
+    <section class="professional-insights">
+        <div class="container">
+            <h2 class="section-title">Insights Profesionales by L3HO</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Análisis Táctico</h3>
+                    <p>Análisis profundo de formaciones, estrategias y rendimiento táctico de cada equipo.</p>
+                    <a href="#" class="insight-link">Ver Análisis <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Métricas Avanzadas</h3>
+                    <p>Estadísticas avanzadas, xG, heat maps y análisis de rendimiento individual.</p>
+                    <a href="#" class="insight-link">Ver Métricas <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Predicciones Pro</h3>
+                    <p>Algoritmos avanzados para predicciones de partidos y tendencias del campeonato.</p>
+                    <a href="#" class="insight-link">Ver Predicciones <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Liga MX</h3>
-                    <p>La primera división del fútbol mexicano</p>
+                    <h3>UltraGol</h3>
+                    <p>Plataforma deportiva profesional by L3HO</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -151,7 +335,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Liga MX. Todos los derechos reservados.</p>
+                <p>&copy; 2025 UltraGol by L3HO. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
