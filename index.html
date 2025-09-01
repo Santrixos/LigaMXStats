@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liga MX - Inicio</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.svg" alt="Liga MX" class="logo">
+                <span class="logo-text">Liga MX</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="standings.html" class="nav-link">Tabla de Posiciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="teams.html" class="nav-link">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="fixtures.html" class="nav-link">Partidos</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">Liga MX</h1>
+            <p class="hero-subtitle slide-up">El fútbol mexicano más emocionante</p>
+            <div class="hero-buttons">
+                <a href="standings.html" class="btn btn-primary">Ver Tabla</a>
+                <a href="teams.html" class="btn btn-secondary">Equipos</a>
+            </div>
+        </div>
+        <div class="hero-background">
+            <div class="floating-ball"></div>
+            <div class="floating-ball delay-1"></div>
+            <div class="floating-ball delay-2"></div>
+        </div>
+    </section>
+
+    <!-- Quick Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <h2 class="section-title">Temporada Actual</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-number" data-count="18">0</div>
+                    <div class="stat-label">Equipos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-number" data-count="306">0</div>
+                    <div class="stat-label">Partidos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <div class="stat-number" data-count="850">0</div>
+                    <div class="stat-label">Goles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" data-count="500">0</div>
+                    <div class="stat-label">Jugadores</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Teams Preview -->
+    <section class="top-teams">
+        <div class="container">
+            <h2 class="section-title">Primeros Lugares</h2>
+            <div class="teams-preview" id="topTeamsPreview">
+                <!-- Dynamic content loaded via JavaScript -->
+            </div>
+            <div class="section-footer">
+                <a href="standings.html" class="btn btn-outline">Ver Tabla Completa</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Matches -->
+    <section class="recent-matches">
+        <div class="container">
+            <h2 class="section-title">Últimos Resultados</h2>
+            <div class="matches-container" id="recentMatches">
+                <!-- Dynamic content loaded via JavaScript -->
+            </div>
+            <div class="section-footer">
+                <a href="fixtures.html" class="btn btn-outline">Ver Todos los Partidos</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Liga MX</h3>
+                    <p>La primera división del fútbol mexicano</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="standings.html">Tabla de Posiciones</a></li>
+                        <li><a href="teams.html">Equipos</a></li>
+                        <li><a href="fixtures.html">Partidos</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Información</h4>
+                    <ul>
+                        <li><a href="#">Reglamento</a></li>
+                        <li><a href="#">Estadísticas</a></li>
+                        <li><a href="#">Noticias</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Liga MX. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
