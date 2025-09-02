@@ -9,6 +9,7 @@
     <title>UltraGol - Plataforma Deportiva Profesional</title>
     <link rel="stylesheet" href="css/main.css?v=2024091801">
     <link rel="stylesheet" href="css/animations.css?v=2024091801">
+    <link rel="stylesheet" href="css/firebase-features.css?v=2024091801">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -41,6 +42,35 @@
                     <a href="estadisticas.html" class="nav-link">Estadísticas</a>
                 </li>
             </ul>
+            <!-- Auth Buttons -->
+            <div class="auth-buttons" id="authButtons">
+                <button class="btn btn-outline" onclick="openAuthModal('login')">
+                    <i class="fas fa-sign-in-alt"></i> Inicia Sesión
+                </button>
+                <button class="btn btn-primary" onclick="openAuthModal('register')">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+            </div>
+            
+            <!-- User Menu (Hidden by default) -->
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <div class="user-profile-summary">
+                    <div class="user-avatar" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="userDisplayName">Usuario</span>
+                        <div class="user-stats-mini">
+                            <span class="level">Nv. <span id="userLevel">1</span></span>
+                            <span class="points"><i class="fas fa-star"></i> <span id="userPoints">0</span></span>
+                        </div>
+                    </div>
+                    <button class="profile-dropdown-btn" onclick="toggleProfileDropdown()">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+            
             <div class="hamburger">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -375,6 +405,221 @@
         </div>
     </footer>
 
+    <!-- Authentication Modal -->
+    <div class="modal" id="authModal" style="display: none;">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h2 id="authModalTitle">Iniciar Sesión</h2>
+                <button class="close-modal" onclick="closeAuthModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showAuthTab('login')" id="loginTab">Iniciar Sesión</button>
+                    <button class="auth-tab" onclick="showAuthTab('register')" id="registerTab">Registrarse</button>
+                </div>
+                
+                <!-- Login Form -->
+                <div class="auth-form" id="loginForm">
+                    <form id="loginFormElement">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="loginEmail" required placeholder="tu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="loginPassword" required placeholder="Tu contraseña">
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Iniciar Sesión
+                        </button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>o</span>
+                    </div>
+                    
+                    <button class="btn btn-google full-width" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i>
+                        Continuar con Google
+                    </button>
+                    
+                    <div class="auth-links">
+                        <a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+                
+                <!-- Register Form -->
+                <div class="auth-form" id="registerForm" style="display: none;">
+                    <form id="registerFormElement">
+                        <div class="form-group">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" id="registerName" required placeholder="Tu nombre">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="registerEmail" required placeholder="tu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="registerPassword" required placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <div class="form-group">
+                            <label>Equipo Favorito</label>
+                            <select id="registerFavoriteTeam">
+                                <option value="">Selecciona tu equipo</option>
+                                <option value="america">Club América</option>
+                                <option value="chivas">CD Guadalajara</option>
+                                <option value="cruz-azul">Cruz Azul</option>
+                                <option value="pumas">Pumas UNAM</option>
+                                <option value="tigres">Tigres UANL</option>
+                                <option value="monterrey">CF Monterrey</option>
+                                <option value="santos">Santos Laguna</option>
+                                <option value="leon">Club León</option>
+                            </select>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="acceptTerms" required>
+                                <span class="checkbox-custom"></span>
+                                Acepto los <a href="#">términos y condiciones</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width">
+                            <i class="fas fa-user-plus"></i>
+                            Crear Cuenta
+                        </button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>o</span>
+                    </div>
+                    
+                    <button class="btn btn-google full-width" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i>
+                        Registrarse con Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global API Key Script -->
+    <script>
+        // Set the Firebase API key from environment
+        window.FIREBASE_API_KEY = '${process.env.GOOGLE_API_KEY || 'AIzaSyBvOkBwNQI-GnFUF3Sa416b9S7QJXJNnyg'}';
+    </script>
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="js/firebase-config.js"></script>
+    
+    <!-- Enhanced Main Scripts -->
+    <script type="module">
+        import { initAuth } from './js/auth.js';
+        import { initMatchLinks, setupCommentForm } from './js/match-links.js';
+        import { initNotifications } from './js/notifications.js';
+        import { initUserProfiles } from './js/user-profiles.js';
+        import { initComments } from './js/comments.js';
+        
+        // Initialize all Firebase systems
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase features
+            initAuth();
+            initMatchLinks();
+            initNotifications();
+            initUserProfiles();
+            initComments();
+            
+            // Initialize admin dashboard for admin users
+            import('./js/admin-dashboard.js').then(({ initAdminDashboard }) => {
+                setTimeout(() => {
+                    initAdminDashboard();
+                }, 2000);
+            });
+            
+            // Setup comment form when ready
+            setTimeout(() => {
+                setupCommentForm();
+            }, 1000);
+        });
+        
+        // Global functions for authentication modal
+        window.openAuthModal = function(mode = 'login') {
+            const modal = document.getElementById('authModal');
+            modal.style.display = 'flex';
+            showAuthTab(mode);
+        };
+        
+        window.closeAuthModal = function() {
+            const modal = document.getElementById('authModal');
+            modal.style.display = 'none';
+        };
+        
+        window.showAuthTab = function(tab) {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const modalTitle = document.getElementById('authModalTitle');
+            
+            if (tab === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                modalTitle.textContent = 'Iniciar Sesión';
+            } else {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.style.display = 'block';
+                loginForm.style.display = 'none';
+                modalTitle.textContent = 'Crear Cuenta';
+            }
+        };
+        
+        window.toggleProfileDropdown = function() {
+            const userMenu = document.getElementById('userMenu');
+            userMenu.classList.toggle('dropdown-open');
+        };
+        
+        // Setup form handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            const { loginUser, registerUser, signInWithGoogle } = await import('./js/auth.js');
+            
+            // Login form
+            const loginForm = document.getElementById('loginFormElement');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    await loginUser(email, password);
+                });
+            }
+            
+            // Register form
+            const registerForm = document.getElementById('registerFormElement');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('registerName').value;
+                    const email = document.getElementById('registerEmail').value;
+                    const password = document.getElementById('registerPassword').value;
+                    const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
+                    await registerUser(email, password, name, favoriteTeam);
+                });
+            }
+            
+            // Google sign in
+            window.signInWithGoogle = async function() {
+                await signInWithGoogle();
+            };
+        });
+    </script>
+    
+    <!-- Original main.js -->
     <script src="js/main.js?v=2024091801"></script>
 </body>
 </html>
