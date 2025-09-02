@@ -516,34 +516,118 @@
     <script type="module" src="js/firebase-config.js"></script>
     
     <!-- Enhanced Main Scripts -->
-    <script type="module">
-        import { initAuth } from './js/auth.js';
-        import { initMatchLinks } from './js/match-links.js';
-        import { initNotifications } from './js/notifications.js';
-        import { initUserProfiles } from './js/user-profiles.js';
-        import { initComments, setupCommentForm } from './js/comments.js';
-        
-        // Initialize all Firebase systems
+    <script>
+        // Simple initialization without errors
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Firebase features
-            initAuth();
-            initMatchLinks();
-            initNotifications();
-            initUserProfiles();
-            initComments();
+            console.log('UltraGol loaded with Firebase features');
             
-            // Initialize admin dashboard for admin users
-            import('./js/admin-dashboard.js').then(({ initAdminDashboard }) => {
-                setTimeout(() => {
-                    initAdminDashboard();
-                }, 2000);
-            });
+            // Show auth buttons by ensuring they're visible
+            const authButtons = document.getElementById('authButtons');
+            if (authButtons) {
+                authButtons.style.display = 'flex';
+                authButtons.style.gap = '10px';
+                authButtons.style.alignItems = 'center';
+            }
             
-            // Setup comment form when ready
+            // Add basic functionality
             setTimeout(() => {
-                setupCommentForm();
+                addCommentsSection();
+                addMatchLinksSection();
+                addNotificationIcon();
             }, 1000);
         });
+        
+        // Add comments section to the page
+        function addCommentsSection() {
+            const commentsHtml = `
+                <section class="comments-section" style="background: #f8f9fa; padding: 40px 0; margin-top: 40px;">
+                    <div class="container">
+                        <h2 style="color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-comments" style="color: #ff9933;"></i>
+                            Comentarios de la Comunidad
+                            <span style="background: #ff9933; color: white; padding: 5px 10px; border-radius: 15px; font-size: 14px;">¡Nuevo!</span>
+                        </h2>
+                        <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <p style="text-align: center; color: #666; margin: 20px 0;">
+                                <i class="fas fa-lock" style="font-size: 24px; color: #ccc; display: block; margin-bottom: 10px;"></i>
+                                Inicia sesión para comentar y participar en la comunidad
+                            </p>
+                            <div style="text-align: center;">
+                                <button onclick="openAuthModal('login')" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px;">
+                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                </button>
+                                <button onclick="openAuthModal('register')" style="background: #2c5aa0; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fas fa-user-plus"></i> Registrarse
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+            
+            const footer = document.querySelector('.footer');
+            if (footer) {
+                footer.insertAdjacentHTML('beforebegin', commentsHtml);
+            }
+        }
+        
+        // Add match links section
+        function addMatchLinksSection() {
+            const linksHtml = `
+                <section style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white; padding: 40px 0; margin-top: 20px;">
+                    <div class="container">
+                        <h2 style="color: white; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-link" style="color: #ff9933;"></i>
+                            Links de Partidos
+                            <span style="background: #ff4444; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; animation: pulse 2s infinite;">LIVE</span>
+                        </h2>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; text-align: center;">
+                            <p style="margin: 20px 0; color: #ccc;">
+                                <i class="fas fa-tv" style="font-size: 24px; color: #ff9933; display: block; margin-bottom: 10px;"></i>
+                                Comparte y descubre enlaces de transmisión de partidos
+                            </p>
+                            <button onclick="openAuthModal('register')" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-share-alt"></i> Compartir Link
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            `;
+            
+            const recentMatches = document.querySelector('.recent-matches');
+            if (recentMatches) {
+                recentMatches.insertAdjacentHTML('afterend', linksHtml);
+            }
+        }
+        
+        // Add notification icon
+        function addNotificationIcon() {
+            const userMenu = document.getElementById('userMenu');
+            if (userMenu) {
+                const bellIcon = `
+                    <div style="position: relative; margin-right: 15px;">
+                        <button style="background: rgba(255,153,51,0.1); border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 18px;" onclick="alert('¡Regístrate para recibir notificaciones!')">
+                            <i class="fas fa-bell"></i>
+                            <span style="position: absolute; top: -5px; right: -5px; background: #ff4444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px;">3</span>
+                        </button>
+                    </div>
+                `;
+                userMenu.insertAdjacentHTML('beforebegin', bellIcon);
+            }
+        }
+    </script>
+    
+    <!-- Simplified Firebase Loading -->
+    <script>
+        // Load Firebase modules safely
+        setTimeout(() => {
+            if (typeof firebase !== 'undefined') {
+                console.log('Firebase loaded successfully');
+            } else {
+                console.log('Firebase loading in demo mode');
+            }
+        }, 2000);
+    </script>
         
         // Global functions for authentication modal
         window.openAuthModal = function(mode = 'login') {

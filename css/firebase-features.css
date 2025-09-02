@@ -2,9 +2,11 @@
 
 /* Authentication Styles */
 .auth-buttons {
-    display: flex;
+    display: flex !important;
     gap: 10px;
     align-items: center;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .user-menu {
