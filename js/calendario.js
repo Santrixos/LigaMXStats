@@ -1,21 +1,45 @@
-// Calendario con Jornadas JavaScript for Liga MX Website
+// Enhanced Calendar JavaScript for Liga MX Website by L3HO
 document.addEventListener('DOMContentLoaded', function() {
-    initializeJornadas();
+    initializeCalendar();
 });
 
 // Variables globales
 let currentJornada = 1;
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let currentView = 'jornada'; // 'jornada' or 'month'
 let jornadasData = [];
+let teamsData = [];
+let allMatches = [];
+let filteredMatches = [];
+let selectedTeam = '';
+let selectedMatchType = '';
 
-// Inicializar sistema de jornadas
-async function initializeJornadas() {
+const months = [
+    'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+    'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+];
+
+const days = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
+
+// Inicializar sistema de calendario
+async function initializeCalendar() {
     try {
-        await loadJornadasData();
-        setupJornadasControls();
+        await Promise.all([
+            loadJornadasData(),
+            loadTeamsData(),
+            loadFixturesData()
+        ]);
+        
+        setupCalendarControls();
+        setupViewControls();
+        setupFilters();
+        populateTeamFilter();
         generateJornadasSelector();
         displayJornada(currentJornada);
     } catch (error) {
-        console.error('Error inicializando jornadas:', error);
+        console.error('Error inicializando calendario:', error);
+        showErrorMessage('Error al cargar el calendario');
     }
 }
 
@@ -25,15 +49,84 @@ async function loadJornadasData() {
         const response = await fetch('data/jornadas.json');
         const data = await response.json();
         jornadasData = data.jornadas;
+        return jornadasData;
     } catch (error) {
         console.error('Error cargando datos de jornadas:', error);
         // Datos de fallback si no se puede cargar el JSON
-        jornadasData = [];
+        jornadasData = generateFallbackJornadas();
+        return jornadasData;
     }
 }
 
-// Configurar controles de navegación
-function setupJornadasControls() {
+// Cargar datos de equipos
+async function loadTeamsData() {
+    try {
+        const response = await fetch('data/teams.json');
+        teamsData = await response.json();
+        return teamsData;
+    } catch (error) {
+        console.error('Error cargando datos de equipos:', error);
+        teamsData = [];
+        return [];
+    }
+}
+
+// Cargar datos de partidos
+async function loadFixturesData() {
+    try {
+        const response = await fetch('data/fixtures.json');
+        const fixtures = await response.json();
+        
+        // Combinar partidos de jornadas y fixtures
+        allMatches = [];
+        
+        // Agregar partidos de jornadas
+        jornadasData.forEach(jornada => {
+            jornada.partidos?.forEach(partido => {
+                allMatches.push({
+                    ...partido,
+                    jornada: jornada.numero,
+                    date: parseMatchDate(partido.dia, partido.hora)
+                });
+            });
+        });
+        
+        // Agregar fixtures si existen
+        if (fixtures && Array.isArray(fixtures)) {
+            fixtures.forEach(match => {
+                allMatches.push({
+                    ...match,
+                    date: new Date(match.date)
+                });
+            });
+        }
+        
+        filteredMatches = [...allMatches];
+        return allMatches;
+    } catch (error) {
+        console.error('Error cargando datos de partidos:', error);
+        allMatches = [];
+        filteredMatches = [];
+        return [];
+    }
+}
+
+// Generar jornadas de fallback
+function generateFallbackJornadas() {
+    const fallbackJornadas = [];
+    for (let i = 1; i <= 17; i++) {
+        fallbackJornadas.push({
+            numero: i,
+            fechas: `Jornada ${i}`,
+            partidos: []
+        });
+    }
+    return fallbackJornadas;
+}
+
+// Configurar controles de calendario
+function setupCalendarControls() {
+    // Controles de jornadas
     const prevButton = document.getElementById('prevJornada');
     const nextButton = document.getElementById('nextJornada');
     
@@ -54,6 +147,77 @@ function setupJornadasControls() {
                 displayJornada(currentJornada);
                 updateNavButtons();
             }
+        });
+    }
+    
+    // Controles de mes
+    const prevMonthButton = document.getElementById('prevMonth');
+    const nextMonthButton = document.getElementById('nextMonth');
+    
+    if (prevMonthButton) {
+        prevMonthButton.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            displayMonthView();
+        });
+    }
+    
+    if (nextMonthButton) {
+        nextMonthButton.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            displayMonthView();
+        });
+    }
+}
+
+// Configurar controles de vista
+function setupViewControls() {
+    const jornadaViewBtn = document.getElementById('jornadaView');
+    const monthViewBtn = document.getElementById('monthView');
+    
+    if (jornadaViewBtn) {
+        jornadaViewBtn.addEventListener('click', () => {
+            switchView('jornada');
+        });
+    }
+    
+    if (monthViewBtn) {
+        monthViewBtn.addEventListener('click', () => {
+            switchView('month');
+        });
+    }
+}
+
+// Configurar filtros
+function setupFilters() {
+    const teamFilter = document.getElementById('teamFilter');
+    const matchTypeFilter = document.getElementById('matchTypeFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    
+    if (teamFilter) {
+        teamFilter.addEventListener('change', (e) => {
+            selectedTeam = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (matchTypeFilter) {
+        matchTypeFilter.addEventListener('change', (e) => {
+            selectedMatchType = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            clearAllFilters();
         });
     }
 }
@@ -126,7 +290,52 @@ function displayPartidos(partidos) {
     
     matchesGrid.innerHTML = '';
     
-    partidos.forEach(partido => {
+    // Filtrar partidos si hay filtros aplicados
+    let partidosToShow = partidos;
+    if (selectedTeam || selectedMatchType) {
+        partidosToShow = partidos.filter(partido => {
+            let includeMatch = true;
+            
+            if (selectedTeam) {
+                const teamMatch = partido.local === selectedTeam || partido.visitante === selectedTeam;
+                includeMatch = includeMatch && teamMatch;
+            }
+            
+            if (selectedMatchType && selectedTeam) {
+                if (selectedMatchType === 'local') {
+                    includeMatch = includeMatch && partido.local === selectedTeam;
+                } else if (selectedMatchType === 'visitante') {
+                    includeMatch = includeMatch && partido.visitante === selectedTeam;
+                }
+            }
+            
+            return includeMatch;
+        });
+    }
+    
+    if (partidosToShow.length === 0) {
+        const noMatches = document.createElement('div');
+        noMatches.className = 'no-matches';
+        noMatches.innerHTML = `
+            <div class="no-matches-content">
+                <i class="fas fa-calendar-times"></i>
+                <h3>No hay partidos</h3>
+                <p>No se encontraron partidos con los filtros aplicados</p>
+            </div>
+        `;
+        noMatches.style.cssText = `
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        `;
+        matchesGrid.appendChild(noMatches);
+        return;
+    }
+    
+    partidosToShow.forEach(partido => {
         const partidoCard = createPartidoCard(partido);
         matchesGrid.appendChild(partidoCard);
     });
@@ -181,6 +390,112 @@ function updateJornadaSelector() {
             button.classList.remove('active');
         }
     });
+}
+
+// Cambiar vista
+function switchView(viewType) {
+    currentView = viewType;
+    
+    const jornadaViewBtn = document.getElementById('jornadaView');
+    const monthViewBtn = document.getElementById('monthView');
+    const jornadaSection = document.getElementById('jornadaSection');
+    const monthSection = document.getElementById('monthSection');
+    const matchesSection = document.querySelector('.jornada-matches');
+    
+    // Actualizar botones
+    if (jornadaViewBtn && monthViewBtn) {
+        jornadaViewBtn.classList.toggle('active', viewType === 'jornada');
+        monthViewBtn.classList.toggle('active', viewType === 'month');
+    }
+    
+    // Mostrar/ocultar secciones
+    if (jornadaSection && monthSection && matchesSection) {
+        if (viewType === 'jornada') {
+            jornadaSection.style.display = 'block';
+            monthSection.style.display = 'none';
+            matchesSection.style.display = 'block';
+            displayJornada(currentJornada);
+        } else {
+            jornadaSection.style.display = 'none';
+            monthSection.style.display = 'block';
+            matchesSection.style.display = 'none';
+            displayMonthView();
+        }
+    }
+}
+
+// Poblar filtro de equipos
+function populateTeamFilter() {
+    const teamFilter = document.getElementById('teamFilter');
+    if (!teamFilter || !teamsData.length) return;
+    
+    // Limpiar opciones existentes (excepto la primera)
+    teamFilter.innerHTML = '<option value="">Todos los equipos</option>';
+    
+    // Agregar equipos
+    teamsData.forEach(team => {
+        const option = document.createElement('option');
+        option.value = team.name;
+        option.textContent = team.name;
+        teamFilter.appendChild(option);
+    });
+}
+
+// Aplicar filtros
+function applyFilters() {
+    filteredMatches = allMatches.filter(match => {
+        let includeMatch = true;
+        
+        // Filtro por equipo
+        if (selectedTeam) {
+            const teamMatch = match.local === selectedTeam || 
+                             match.visitante === selectedTeam ||
+                             match.homeTeam === selectedTeam ||
+                             match.awayTeam === selectedTeam;
+            includeMatch = includeMatch && teamMatch;
+        }
+        
+        // Filtro por tipo de partido
+        if (selectedMatchType && selectedTeam) {
+            if (selectedMatchType === 'local') {
+                includeMatch = includeMatch && 
+                              (match.local === selectedTeam || match.homeTeam === selectedTeam);
+            } else if (selectedMatchType === 'visitante') {
+                includeMatch = includeMatch && 
+                              (match.visitante === selectedTeam || match.awayTeam === selectedTeam);
+            }
+        }
+        
+        return includeMatch;
+    });
+    
+    // Actualizar vista actual
+    if (currentView === 'jornada') {
+        displayJornada(currentJornada);
+    } else {
+        displayMonthView();
+    }
+}
+
+// Limpiar filtros
+function clearAllFilters() {
+    selectedTeam = '';
+    selectedMatchType = '';
+    
+    const teamFilter = document.getElementById('teamFilter');
+    const matchTypeFilter = document.getElementById('matchTypeFilter');
+    
+    if (teamFilter) teamFilter.value = '';
+    if (matchTypeFilter) matchTypeFilter.value = '';
+    
+    filteredMatches = [...allMatches];
+    
+    // Actualizar vista actual
+    if (currentView === 'jornada') {
+        displayJornada(currentJornada);
+    } else {
+        displayMonthView();
+    }
 }
 
 // Actualizar botones de navegación
@@ -374,10 +689,241 @@ function getCurrentJornada() {
     return currentJornada;
 }
 
+// Mostrar vista mensual
+function displayMonthView() {
+    const currentMonthElement = document.getElementById('currentMonth');
+    const calendarGrid = document.getElementById('calendarGrid');
+    
+    if (currentMonthElement) {
+        currentMonthElement.textContent = `${months[currentMonth]} ${currentYear}`;
+    }
+    
+    if (calendarGrid) {
+        generateCalendarGrid();
+    }
+}
+
+// Generar grilla del calendario
+function generateCalendarGrid() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    if (!calendarGrid) return;
+    
+    calendarGrid.innerHTML = '';
+    
+    // Agregar encabezados de días
+    days.forEach(day => {
+        const header = document.createElement('div');
+        header.className = 'calendar-header';
+        header.textContent = day;
+        calendarGrid.appendChild(header);
+    });
+    
+    // Obtener primer día del mes y días en el mes
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDate = firstDay.getDay();
+    
+    // Días del mes anterior
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    const prevMonthLastDay = new Date(prevYear, prevMonth + 1, 0).getDate();
+    
+    for (let i = startDate - 1; i >= 0; i--) {
+        const dayElement = createCalendarDay(
+            prevMonthLastDay - i, 
+            prevMonth, 
+            prevYear, 
+            true
+        );
+        calendarGrid.appendChild(dayElement);
+    }
+    
+    // Días del mes actual
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = createCalendarDay(day, currentMonth, currentYear, false);
+        calendarGrid.appendChild(dayElement);
+    }
+    
+    // Días del siguiente mes
+    const totalCells = calendarGrid.children.length - 7; // -7 por los headers
+    const remainingCells = 42 - totalCells; // 6 semanas * 7 días
+    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createCalendarDay(day, nextMonth, nextYear, true);
+        calendarGrid.appendChild(dayElement);
+    }
+}
+
+// Crear elemento de día del calendario
+function createCalendarDay(day, month, year, otherMonth) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    
+    if (otherMonth) {
+        dayElement.classList.add('other-month');
+    }
+    
+    // Verificar si es hoy
+    const today = new Date();
+    const dayDate = new Date(year, month, day);
+    if (dayDate.toDateString() === today.toDateString()) {
+        dayElement.classList.add('today');
+    }
+    
+    // Número del día
+    const dayNumber = document.createElement('div');
+    dayNumber.className = 'day-number';
+    dayNumber.textContent = day;
+    dayElement.appendChild(dayNumber);
+    
+    // Partidos del día
+    const dayMatches = document.createElement('div');
+    dayMatches.className = 'day-matches';
+    
+    // Buscar partidos para este día
+    const dayMatchesData = filteredMatches.filter(match => {
+        const matchDate = match.date || parseMatchDate(match.dia, match.hora);
+        if (!matchDate) return false;
+        
+        return matchDate.getDate() === day &&
+               matchDate.getMonth() === month &&
+               matchDate.getFullYear() === year;
+    });
+    
+    dayMatchesData.forEach(match => {
+        const matchElement = document.createElement('div');
+        matchElement.className = 'day-match';
+        
+        const homeTeam = match.local || match.homeTeam || 'TBD';
+        const awayTeam = match.visitante || match.awayTeam || 'TBD';
+        
+        matchElement.textContent = `${homeTeam.substring(0, 3)} vs ${awayTeam.substring(0, 3)}`;
+        matchElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showMatchDetails(match);
+        });
+        
+        dayMatches.appendChild(matchElement);
+    });
+    
+    dayElement.appendChild(dayMatches);
+    
+    return dayElement;
+}
+
+// Parsear fecha de partido
+function parseMatchDate(dia, hora) {
+    if (!dia || !hora) return null;
+    
+    try {
+        // Asumiendo formato básico - esto debería mejorarse con datos reales
+        const currentDate = new Date();
+        return new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(dia));
+    } catch (error) {
+        return null;
+    }
+}
+
+// Mostrar detalles del partido
+function showMatchDetails(match) {
+    const modal = document.createElement('div');
+    modal.className = 'match-details-modal';
+    
+    const homeTeam = match.local || match.homeTeam || 'TBD';
+    const awayTeam = match.visitante || match.awayTeam || 'TBD';
+    const stadium = match.estadio || match.stadium || 'Estadio por confirmar';
+    const time = match.hora || match.time || 'Hora por confirmar';
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalles del Partido</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="match-teams-detail">
+                    <div class="team-detail">
+                        <div class="team-logo-large">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>${homeTeam}</h4>
+                        <span class="team-type">Local</span>
+                    </div>
+                    <div class="vs-large">VS</div>
+                    <div class="team-detail">
+                        <div class="team-logo-large">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>${awayTeam}</h4>
+                        <span class="team-type">Visitante</span>
+                    </div>
+                </div>
+                <div class="match-details">
+                    <p><i class="fas fa-clock"></i> <strong>Hora:</strong> ${time}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Estadio:</strong> ${stadium}</p>
+                    ${match.jornada ? `<p><i class="fas fa-calendar-alt"></i> <strong>Jornada:</strong> ${match.jornada}</p>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    `;
+    
+    const modalContent = modal.querySelector('.modal-content');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        position: relative;
+    `;
+    
+    // Cerrar modal
+    const closeButton = modal.querySelector('.close-modal');
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+    
+    document.body.appendChild(modal);
+}
+
+// Mostrar mensaje de error
+function showErrorMessage(message) {
+    console.error(message);
+    // Implementar notificación visual si es necesario
+}
+
 // Exportar funciones para uso global
-window.jornadasApp = {
+window.calendarApp = {
+    switchView,
     goToJornada,
     getCurrentJornada,
     displayJornada,
-    jornadasData: () => jornadasData
+    displayMonthView,
+    applyFilters,
+    clearAllFilters,
+    jornadasData: () => jornadasData,
+    teamsData: () => teamsData,
+    allMatches: () => allMatches
 };

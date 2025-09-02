@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global variables
-let teamsData = [];
 let standingsData = [];
 let fixturesData = [];
 
@@ -482,6 +481,8 @@ function setupAdvancedFeatures() {
     setupFilterSystem();
     setupRealTimeUpdates();
     setupDataVisualization();
+    setupTeamComparison();
+    setupInteractiveStats();
 }
 
 // Real-time updates placeholder (for static website)
@@ -514,7 +515,10 @@ function setupSearchFunctionality() {
 }
 
 function performGlobalSearch(query) {
-    if (!query) return;
+    if (!query) {
+        hideSearchResults();
+        return;
+    }
     
     const results = {
         teams: searchTeams(query),
@@ -523,6 +527,186 @@ function performGlobalSearch(query) {
     };
     
     displaySearchResults(results);
+}
+
+// Display Search Results
+function displaySearchResults(results) {
+    let existingResults = document.getElementById('searchResults');
+    
+    if (!existingResults) {
+        existingResults = document.createElement('div');
+        existingResults.id = 'searchResults';
+        existingResults.className = 'search-results';
+        
+        const searchBar = document.querySelector('.search-bar');
+        if (searchBar) {
+            searchBar.appendChild(existingResults);
+        }
+    }
+    
+    const totalResults = results.teams.length + results.matches.length;
+    
+    if (totalResults === 0) {
+        existingResults.innerHTML = `
+            <div class="search-no-results">
+                <i class="fas fa-search"></i>
+                <p>No se encontraron resultados</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let resultsHTML = '<div class="search-results-container">';
+    
+    if (results.teams.length > 0) {
+        resultsHTML += '<div class="search-section">';
+        resultsHTML += '<h4><i class="fas fa-shield-alt"></i> Equipos</h4>';
+        results.teams.slice(0, 5).forEach(team => {
+            resultsHTML += `
+                <div class="search-result-item" onclick="goToTeam('${team.id}')">
+                    <div class="result-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="result-info">
+                        <span class="result-title">${team.name}</span>
+                        <span class="result-subtitle">${team.nickname} - ${team.city}</span>
+                    </div>
+                </div>
+            `;
+        });
+        resultsHTML += '</div>';
+    }
+    
+    if (results.matches.length > 0) {
+        resultsHTML += '<div class="search-section">';
+        resultsHTML += '<h4><i class="fas fa-futbol"></i> Partidos</h4>';
+        results.matches.slice(0, 5).forEach(match => {
+            resultsHTML += `
+                <div class="search-result-item">
+                    <div class="result-icon"><i class="fas fa-futbol"></i></div>
+                    <div class="result-info">
+                        <span class="result-title">${match.homeTeam} vs ${match.awayTeam}</span>
+                        <span class="result-subtitle">${formatDate(match.date)}</span>
+                    </div>
+                </div>
+            `;
+        });
+        resultsHTML += '</div>';
+    }
+    
+    resultsHTML += '</div>';
+    existingResults.innerHTML = resultsHTML;
+    
+    // Add search results styles
+    if (!document.getElementById('search-results-styles')) {
+        addSearchResultsStyles();
+    }
+}
+
+// Hide Search Results
+function hideSearchResults() {
+    const existingResults = document.getElementById('searchResults');
+    if (existingResults) {
+        existingResults.innerHTML = '';
+    }
+}
+
+// Go to Team
+function goToTeam(teamId) {
+    window.location.href = `team-profile.html?team=${teamId}`;
+}
+
+// Add Search Results Styles
+function addSearchResultsStyles() {
+    const style = document.createElement('style');
+    style.id = 'search-results-styles';
+    style.textContent = `
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .search-results-container {
+            padding: 15px;
+        }
+        
+        .search-section {
+            margin-bottom: 15px;
+        }
+        
+        .search-section h4 {
+            color: #ff9933;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            gap: 10px;
+        }
+        
+        .search-result-item:hover {
+            background: rgba(255, 153, 51, 0.1);
+        }
+        
+        .result-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 153, 51, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff9933;
+            font-size: 0.8rem;
+        }
+        
+        .result-info {
+            flex: 1;
+        }
+        
+        .result-title {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .result-subtitle {
+            display: block;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .search-no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .search-no-results i {
+            font-size: 2rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 function searchMatches(query) {
@@ -568,8 +752,8 @@ function applyFilter(type, value) {
 
 // Enhanced Team Comparison
 function compareTeams(team1Id, team2Id) {
-    const team1 = standingsData.find(t => t.id === team1Id);
-    const team2 = standingsData.find(t => t.id === team2Id);
+    const team1 = standingsData.find(t => t.id === team1Id || t.name === team1Id);
+    const team2 = standingsData.find(t => t.id === team2Id || t.name === team2Id);
     
     if (!team1 || !team2) return null;
     
@@ -579,9 +763,437 @@ function compareTeams(team1Id, team2Id) {
         comparison: {
             pointsDiff: team1.points - team2.points,
             winsDiff: team1.wins - team2.wins,
-            goalsDiff: (team1.goalsFor - team1.goalsAgainst) - (team2.goalsFor - team2.goalsAgainst)
+            goalsDiff: (team1.goalsFor - team1.goalsAgainst) - (team2.goalsFor - team2.goalsAgainst),
+            positionDiff: team2.position - team1.position
         }
     };
+}
+
+// Setup Team Comparison
+function setupTeamComparison() {
+    const team1Select = document.getElementById('team1Select');
+    const team2Select = document.getElementById('team2Select');
+    const compareBtn = document.getElementById('compareBtn');
+    const comparisonResults = document.getElementById('comparisonResults');
+    
+    if (!team1Select || !team2Select || !compareBtn) return;
+    
+    // Populate team selectors
+    populateTeamSelectors();
+    
+    compareBtn.addEventListener('click', () => {
+        const team1 = team1Select.value;
+        const team2 = team2Select.value;
+        
+        if (team1 && team2 && team1 !== team2) {
+            const comparison = compareTeams(team1, team2);
+            if (comparison && comparisonResults) {
+                displayComparisonResults(comparison, comparisonResults);
+            }
+        } else {
+            showErrorMessage('Por favor selecciona dos equipos diferentes');
+        }
+    });
+}
+
+// Populate Team Selectors
+function populateTeamSelectors() {
+    const team1Select = document.getElementById('team1Select');
+    const team2Select = document.getElementById('team2Select');
+    
+    if (!team1Select || !team2Select || !standingsData.length) return;
+    
+    standingsData.forEach(team => {
+        const option1 = document.createElement('option');
+        option1.value = team.name;
+        option1.textContent = team.name;
+        team1Select.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = team.name;
+        option2.textContent = team.name;
+        team2Select.appendChild(option2);
+    });
+}
+
+// Display Comparison Results
+function displayComparisonResults(comparison, container) {
+    const { team1, team2, comparison: stats } = comparison;
+    
+    container.innerHTML = `
+        <div class="comparison-result">
+            <div class="team-comparison-card">
+                <div class="team-comparison-header">
+                    <h3>Comparación de Equipos</h3>
+                    <button class="close-comparison" onclick="this.parentElement.parentElement.parentElement.innerHTML = ''">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="teams-comparison">
+                    <div class="team-comparison-side">
+                        <div class="team-logo-comparison">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>${team1.name}</h4>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Posición</span>
+                                <span class="stat-value ${stats.positionDiff > 0 ? 'better' : stats.positionDiff < 0 ? 'worse' : 'equal'}">${team1.position}°</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Puntos</span>
+                                <span class="stat-value ${stats.pointsDiff > 0 ? 'better' : stats.pointsDiff < 0 ? 'worse' : 'equal'}">${team1.points}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Victorias</span>
+                                <span class="stat-value ${stats.winsDiff > 0 ? 'better' : stats.winsDiff < 0 ? 'worse' : 'equal'}">${team1.wins}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Dif. Goles</span>
+                                <span class="stat-value ${stats.goalsDiff > 0 ? 'better' : stats.goalsDiff < 0 ? 'worse' : 'equal'}">${team1.goalsFor - team1.goalsAgainst > 0 ? '+' : ''}${team1.goalsFor - team1.goalsAgainst}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vs-comparison">
+                        <div class="vs-circle">
+                            <span>VS</span>
+                        </div>
+                        <div class="comparison-summary">
+                            ${stats.pointsDiff > 0 ? 
+                                `<p><i class="fas fa-trophy text-success"></i> ${team1.name} está ${Math.abs(stats.pointsDiff)} puntos arriba</p>` :
+                                stats.pointsDiff < 0 ?
+                                `<p><i class="fas fa-trophy text-success"></i> ${team2.name} está ${Math.abs(stats.pointsDiff)} puntos arriba</p>` :
+                                '<p><i class="fas fa-equals"></i> Empatados en puntos</p>'
+                            }
+                        </div>
+                    </div>
+                    <div class="team-comparison-side">
+                        <div class="team-logo-comparison">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>${team2.name}</h4>
+                        <div class="team-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Posición</span>
+                                <span class="stat-value ${stats.positionDiff < 0 ? 'better' : stats.positionDiff > 0 ? 'worse' : 'equal'}">${team2.position}°</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Puntos</span>
+                                <span class="stat-value ${stats.pointsDiff < 0 ? 'better' : stats.pointsDiff > 0 ? 'worse' : 'equal'}">${team2.points}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Victorias</span>
+                                <span class="stat-value ${stats.winsDiff < 0 ? 'better' : stats.winsDiff > 0 ? 'worse' : 'equal'}">${team2.wins}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Dif. Goles</span>
+                                <span class="stat-value ${stats.goalsDiff < 0 ? 'better' : stats.goalsDiff > 0 ? 'worse' : 'equal'}">${team2.goalsFor - team2.goalsAgainst > 0 ? '+' : ''}${team2.goalsFor - team2.goalsAgainst}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add styles for comparison
+    if (!document.getElementById('comparison-styles')) {
+        addComparisonStyles();
+    }
+}
+
+// Add Comparison Styles
+function addComparisonStyles() {
+    const style = document.createElement('style');
+    style.id = 'comparison-styles';
+    style.textContent = `
+        .comparison-result {
+            margin-top: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .team-comparison-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #ff9933;
+        }
+        
+        .team-comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff9933;
+        }
+        
+        .team-comparison-header h3 {
+            color: #ff9933;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .close-comparison {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-comparison:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+        
+        .teams-comparison {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .team-comparison-side {
+            text-align: center;
+        }
+        
+        .team-logo-comparison {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 153, 51, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #ff9933;
+        }
+        
+        .team-comparison-side h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .team-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .stat-value.better {
+            color: #28a745;
+        }
+        
+        .stat-value.worse {
+            color: #dc3545;
+        }
+        
+        .stat-value.equal {
+            color: #6c757d;
+        }
+        
+        .vs-comparison {
+            text-align: center;
+        }
+        
+        .vs-circle {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff9933, #ffaa44);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 10px;
+        }
+        
+        .comparison-summary {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .text-success {
+            color: #28a745;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .teams-comparison {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .vs-comparison {
+                order: -1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Setup Interactive Statistics
+function setupInteractiveStats() {
+    // Animate counters when in view
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observer.observe(statsSection);
+    }
+    
+    // Add click-to-refresh functionality
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('click', () => {
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.style.transform = '';
+                const counter = card.querySelector('[data-count]');
+                if (counter) {
+                    animateSingleCounter(counter);
+                }
+            }, 150);
+        });
+        
+        // Add tooltip
+        card.setAttribute('title', 'Haz clic para actualizar');
+    });
+}
+
+// Animate Single Counter
+function animateSingleCounter(counter) {
+    const target = parseInt(counter.getAttribute('data-count'));
+    const duration = 1000;
+    const step = target / (duration / 16);
+    let current = 0;
+    
+    const timer = setInterval(() => {
+        current += step;
+        counter.textContent = Math.floor(current);
+        
+        if (current >= target) {
+            counter.textContent = target;
+            clearInterval(timer);
+        }
+    }, 16);
+}
+
+// Enhanced Filter System
+function applyAdvancedFilter(type, value) {
+    let filteredData;
+    
+    switch(type) {
+        case 'region':
+            filteredData = filterTeamsByRegion(value);
+            updateTeamsDisplay(filteredData);
+            break;
+        case 'status':
+            filteredData = filterMatchesByStatus(value);
+            updateMatchesDisplay(filteredData);
+            break;
+        case 'team-performance':
+            filteredData = filterTeamsByPerformance(value);
+            updateTeamsDisplay(filteredData);
+            break;
+        default:
+            return;
+    }
+    
+    // Update filter buttons
+    updateFilterButtons(type, value);
+}
+
+// Filter Teams by Performance
+function filterTeamsByPerformance(performance) {
+    if (!performance || performance === 'all') return standingsData;
+    
+    switch(performance) {
+        case 'top':
+            return standingsData.slice(0, 6);
+        case 'middle':
+            return standingsData.slice(6, 12);
+        case 'bottom':
+            return standingsData.slice(12);
+        default:
+            return standingsData;
+    }
+}
+
+// Update Teams Display
+function updateTeamsDisplay(teams) {
+    const container = document.getElementById('topTeamsPreview');
+    if (!container) return;
+    
+    container.innerHTML = teams.slice(0, 3).map((team, index) => `
+        <div class="team-preview-card stagger-item" style="animation-delay: ${index * 0.2}s">
+            <div class="team-position">${team.position}° Lugar</div>
+            <div class="team-name">${team.name}</div>
+            <div class="team-points">${team.points} pts</div>
+            <div class="team-stats">
+                <span>PJ: ${team.played}</span>
+                <span>G: ${team.wins}</span>
+                <span>E: ${team.draws}</span>
+                <span>P: ${team.losses}</span>
+            </div>
+            <button class="team-details-btn" onclick="goToTeam('${team.id}')">
+                <i class="fas fa-eye"></i> Ver Detalles
+            </button>
+        </div>
+    `).join('');
+}
+
+// Update Filter Buttons
+function updateFilterButtons(type, value) {
+    const filterButtons = document.querySelectorAll(`[data-filter="${type}"]`);
+    filterButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === value);
+    });
 }
 
 // Export functions for use in other files
@@ -602,5 +1214,9 @@ window.ultraGolApp = {
     applyTeamTheme,
     compareTeams,
     performGlobalSearch,
-    setupCarousel
+    setupCarousel,
+    setupTeamComparison,
+    displaySearchResults,
+    goToTeam,
+    applyAdvancedFilter
 };
