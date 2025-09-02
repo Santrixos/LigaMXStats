@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Calendario Liga MX - UltraGol</title>
+    <link rel="stylesheet" href="css/main.css?v=2024091801">
+    <link rel="stylesheet" href="css/animations.css?v=2024091801">
+    <link rel="stylesheet" href="css/teams.css?v=2024091801">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .calendar-hero {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 120px 0 80px;
+            text-align: center;
+            color: white;
+        }
+
+        .calendar-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .calendar-hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calendar-controls {
+            background: white;
+            padding: 40px 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .calendar-nav button {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .calendar-nav button:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+        }
+
+        .current-month {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c5aa0;
+        }
+
+        .calendar-filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 2px solid #2c5aa0;
+            color: #2c5aa0;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .calendar-grid {
+            background: white;
+            margin: 40px 0;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .calendar-day-header {
+            padding: 20px 10px;
+            text-align: center;
+            font-weight: 700;
+            color: #2c5aa0;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .calendar-day-header:last-child {
+            border-right: none;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border: 1px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+
+        .calendar-day {
+            min-height: 120px;
+            padding: 15px;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+
+        .calendar-day:last-child {
+            border-right: none;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #2c5aa0, #1e3c72);
+            color: white;
+        }
+
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .match-event {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .match-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .match-event.important {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+        }
+
+        .match-event.derby {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+        }
+
+        .upcoming-matches {
+            padding: 60px 0;
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 50px;
+        }
+
+        .matches-list {
+            display: grid;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .match-date {
+            background: #2c5aa0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .match-importance {
+            display: flex;
+            gap: 5px;
+        }
+
+        .star {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .team {
+            flex: 1;
+        }
+
+        .team-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #2c5aa0;
+        }
+
+        .vs-indicator {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6c757d;
+            padding: 0 20px;
+        }
+
+        .match-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .stadium {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .match-time {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .calendar-nav {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .calendar-filters {
+                gap: 10px;
+            }
+
+            .filter-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 10px;
+            }
+
+            .match-event {
+                font-size: 0.7rem;
+                padding: 4px 6px;
+            }
+
+            .match-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .match-teams {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .vs-indicator {
+                transform: rotate(90deg);
+                padding: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.svg" alt="UltraGol" class="logo">
+                <span class="logo-text">UltraGol</span>
+                <span class="company-tag">by L3HO</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="standings.html" class="nav-link">Tabla de Posiciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="teams.html" class="nav-link">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="fixtures.html" class="nav-link">Partidos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendario.html" class="nav-link active">Calendario</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Calendar Hero Section -->
+    <section class="calendar-hero">
+        <div class="container">
+            <h1 class="fade-in">Calendario Liga MX</h1>
+            <p class="slide-up">Mantente al día con todos los partidos del torneo</p>
+        </div>
+    </section>
+
+    <!-- Calendar Controls -->
+    <section class="calendar-controls">
+        <div class="container">
+            <div class="calendar-nav">
+                <button id="prevMonth">
+                    <i class="fas fa-chevron-left"></i>
+                    Anterior
+                </button>
+                <h2 class="current-month" id="currentMonth">Septiembre 2025</h2>
+                <button id="nextMonth">
+                    Siguiente
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="calendar-filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="important">Partidos Importantes</button>
+                <button class="filter-btn" data-filter="derby">Clásicos</button>
+                <button class="filter-btn" data-filter="local">Partidos Locales</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Grid -->
+    <section class="calendar-grid">
+        <div class="container">
+            <div class="calendar-header">
+                <div class="calendar-day-header">DOM</div>
+                <div class="calendar-day-header">LUN</div>
+                <div class="calendar-day-header">MAR</div>
+                <div class="calendar-day-header">MIÉ</div>
+                <div class="calendar-day-header">JUE</div>
+                <div class="calendar-day-header">VIE</div>
+                <div class="calendar-day-header">SÁB</div>
+            </div>
+            <div class="calendar-days" id="calendarDays">
+                <!-- Días del calendario se generarán dinámicamente -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Upcoming Matches -->
+    <section class="upcoming-matches">
+        <div class="container">
+            <h2 class="section-title">Próximos Partidos Destacados</h2>
+            <div class="matches-list" id="upcomingMatches">
+                
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            Sábado 7 Sep
+                        </div>
+                        <div class="match-importance">
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                        </div>
+                    </div>
+                    <div class="match-teams">
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Club América</div>
+                        </div>
+                        <div class="vs-indicator">VS</div>
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Monterrey</div>
+                        </div>
+                    </div>
+                    <div class="match-info">
+                        <div class="stadium">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Estadio Azteca
+                        </div>
+                        <div class="match-time">19:30</div>
+                    </div>
+                </div>
+
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            Domingo 8 Sep
+                        </div>
+                        <div class="match-importance">
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="far fa-star star"></i>
+                        </div>
+                    </div>
+                    <div class="match-teams">
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Cruz Azul</div>
+                        </div>
+                        <div class="vs-indicator">VS</div>
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Pumas UNAM</div>
+                        </div>
+                    </div>
+                    <div class="match-info">
+                        <div class="stadium">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Estadio Azul
+                        </div>
+                        <div class="match-time">17:00</div>
+                    </div>
+                </div>
+
+                <div class="match-card">
+                    <div class="match-header">
+                        <div class="match-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            Miércoles 11 Sep
+                        </div>
+                        <div class="match-importance">
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="fas fa-star star"></i>
+                            <i class="far fa-star star"></i>
+                            <i class="far fa-star star"></i>
+                        </div>
+                    </div>
+                    <div class="match-teams">
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Tigres UANL</div>
+                        </div>
+                        <div class="vs-indicator">VS</div>
+                        <div class="team">
+                            <div class="team-logo">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="team-name">Santos Laguna</div>
+                        </div>
+                    </div>
+                    <div class="match-info">
+                        <div class="stadium">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Estadio Universitario
+                        </div>
+                        <div class="match-time">21:00</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>UltraGol</h3>
+                    <p>Plataforma deportiva profesional by L3HO</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="standings.html">Tabla de Posiciones</a></li>
+                        <li><a href="teams.html">Equipos</a></li>
+                        <li><a href="fixtures.html">Partidos</a></li>
+                        <li><a href="calendario.html">Calendario</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Información</h4>
+                    <ul>
+                        <li><a href="#">Reglamento</a></li>
+                        <li><a href="#">Estadísticas</a></li>
+                        <li><a href="#">Noticias</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 UltraGol by L3HO. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js?v=2024091801"></script>
+    <script src="js/calendario.js?v=2024091801"></script>
+</body>
+</html>
