@@ -668,49 +668,85 @@
         };
         
         window.showForgotPassword = function() {
-            alert('En modo demo: Funcionalidad de recuperación de contraseña no disponible');
+            showSuccessMessage('En modo demo: Funcionalidad de recuperación de contraseña no disponible');
         };
     </script>
     
     <!-- Setup form handlers -->
     <script>
-        // Setup form handlers
-        setTimeout(async () => {
-            try {
-                const { loginUser, registerUser, signInWithGoogle } = await import('./js/auth.js');
+        // Simple demo mode handlers without Firebase
+        
+        // Login form
+        const loginForm = document.getElementById('loginFormElement');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
                 
-                // Login form
-                const loginForm = document.getElementById('loginFormElement');
-                if (loginForm) {
-                    loginForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const email = document.getElementById('loginEmail').value;
-                        const password = document.getElementById('loginPassword').value;
-                        await loginUser(email, password);
-                    });
+                if (email && password) {
+                    // Simulate login success
+                    setTimeout(() => {
+                        showSuccessMessage('¡Bienvenido de vuelta en modo demo!');
+                        closeAuthModal();
+                        showUserLoggedIn(email);
+                    }, 1000);
+                } else {
+                    showErrorMessage('Por favor completa todos los campos');
                 }
+            });
+        }
+        
+        // Register form
+        const registerForm = document.getElementById('registerFormElement');
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
                 
-                // Register form
-                const registerForm = document.getElementById('registerFormElement');
-                if (registerForm) {
-                    registerForm.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const name = document.getElementById('registerName').value;
-                        const email = document.getElementById('registerEmail').value;
-                        const password = document.getElementById('registerPassword').value;
-                        const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
-                        await registerUser(email, password, name, favoriteTeam);
-                    });
+                if (name && email && password) {
+                    // Simulate registration success
+                    setTimeout(() => {
+                        showSuccessMessage('¡Cuenta creada exitosamente en modo demo!');
+                        closeAuthModal();
+                        showUserLoggedIn(email, name);
+                    }, 1000);
+                } else {
+                    showErrorMessage('Por favor completa todos los campos');
                 }
-                
-                // Google sign in
-                window.signInWithGoogle = async function() {
-                    await signInWithGoogle();
-                };
-            } catch (error) {
-                console.log('Form handlers setup later:', error);
-            }
-        }, 2000);
+            });
+        }
+        
+        // Google sign in
+        window.signInWithGoogle = function() {
+            setTimeout(() => {
+                showSuccessMessage('¡Bienvenido con Google en modo demo!');
+                closeAuthModal();
+                showUserLoggedIn('demo@google.com', 'Usuario Google Demo');
+            }, 1000);
+        };
+        
+        // Show user as logged in
+        function showUserLoggedIn(email, name = 'Usuario Demo') {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userDisplayName = document.getElementById('userDisplayName');
+            
+            if (authButtons) authButtons.style.display = 'none';
+            if (userMenu) userMenu.style.display = 'flex';
+            if (userDisplayName) userDisplayName.textContent = name;
+        }
+        
+        // Success/Error message functions
+        function showSuccessMessage(message) {
+            alert('✅ ' + message);
+        }
+        
+        function showErrorMessage(message) {
+            alert('❌ ' + message);
+        }
     </script>
     
     <!-- Original main.js -->
