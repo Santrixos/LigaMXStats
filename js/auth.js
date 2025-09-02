@@ -1,24 +1,57 @@
-// Authentication System for Liga MX UltraGol
+// Authentication System for Liga MX UltraGol - Demo Mode
 import { auth, db } from './firebase-config.js';
-import { 
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    sendPasswordResetEmail,
-    updateProfile,
-    GoogleAuthProvider,
-    signInWithPopup
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { 
-    doc, 
-    setDoc, 
-    getDoc, 
-    updateDoc,
-    serverTimestamp 
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// Google provider
-const googleProvider = new GoogleAuthProvider();
+// Demo mode - create mock functions for Firebase auth
+const DEMO_MODE = true;
+
+// Mock Firebase auth functions for demo
+const createUserWithEmailAndPassword = DEMO_MODE ? 
+    (auth, email, password) => Promise.resolve({ user: { uid: 'demo-user', email, displayName: null } }) :
+    null;
+
+const signInWithEmailAndPassword = DEMO_MODE ? 
+    (auth, email, password) => Promise.resolve({ user: { uid: 'demo-user', email, displayName: 'Usuario Demo' } }) :
+    null;
+
+const signOut = DEMO_MODE ? 
+    (auth) => Promise.resolve() :
+    null;
+
+const sendPasswordResetEmail = DEMO_MODE ? 
+    (auth, email) => Promise.resolve() :
+    null;
+
+const updateProfile = DEMO_MODE ? 
+    (user, profile) => Promise.resolve() :
+    null;
+
+const signInWithPopup = DEMO_MODE ? 
+    (auth, provider) => Promise.resolve({ user: { uid: 'demo-google-user', email: 'demo@google.com', displayName: 'Usuario Google Demo' } }) :
+    null;
+
+// Mock Google provider for demo
+const googleProvider = DEMO_MODE ? {} : null;
+
+// Mock Firestore functions for demo
+const doc = DEMO_MODE ? 
+    (db, collection, id) => ({ collection, id }) :
+    null;
+
+const setDoc = DEMO_MODE ? 
+    (ref, data) => Promise.resolve() :
+    null;
+
+const getDoc = DEMO_MODE ? 
+    (ref) => Promise.resolve({ exists: () => false, data: () => null }) :
+    null;
+
+const updateDoc = DEMO_MODE ? 
+    (ref, data) => Promise.resolve() :
+    null;
+
+const serverTimestamp = DEMO_MODE ? 
+    () => new Date() :
+    null;
 
 // Current user state
 export let currentUser = null;
@@ -56,14 +89,22 @@ export async function registerUser(email, password, displayName, favoriteTeam) {
         await createUserProfile(user, { favoriteTeam });
         
         hideLoading();
-        showSuccessMessage('¡Cuenta creada exitosamente!');
+        showSuccessMessage('¡Cuenta creada exitosamente en modo demo!');
         closeModal('authModal');
+        
+        // In demo mode, simulate login
+        if (DEMO_MODE) {
+            currentUser = { ...user, displayName: displayName };
+            setTimeout(() => {
+                showUserInterface();
+                updateNavbarAuth();
+            }, 500);
+        }
         
         return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
-        throw error;
     }
 }
 
@@ -76,14 +117,22 @@ export async function loginUser(email, password) {
         const user = userCredential.user;
         
         hideLoading();
-        showSuccessMessage('¡Bienvenido de vuelta!');
+        showSuccessMessage('¡Bienvenido de vuelta en modo demo!');
         closeModal('authModal');
+        
+        // In demo mode, simulate login
+        if (DEMO_MODE) {
+            currentUser = { ...user, displayName: user.displayName || 'Usuario Demo' };
+            setTimeout(() => {
+                showUserInterface();
+                updateNavbarAuth();
+            }, 500);
+        }
         
         return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
-        throw error;
     }
 }
 
@@ -96,14 +145,22 @@ export async function signInWithGoogle() {
         const user = result.user;
         
         hideLoading();
-        showSuccessMessage('¡Bienvenido!');
+        showSuccessMessage('¡Bienvenido en modo demo!');
         closeModal('authModal');
+        
+        // In demo mode, simulate login
+        if (DEMO_MODE) {
+            currentUser = { ...user, displayName: user.displayName || 'Usuario Google Demo' };
+            setTimeout(() => {
+                showUserInterface();
+                updateNavbarAuth();
+            }, 500);
+        }
         
         return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
-        throw error;
     }
 }
 
@@ -267,40 +324,9 @@ function updateNavbarAuth() {
     }
 }
 
-// Handle authentication errors
-function handleAuthError(error) {
-    let message = 'Error desconocido';
-    
-    switch (error.code) {
-        case 'auth/email-already-in-use':
-            message = 'Este email ya está registrado';
-            break;
-        case 'auth/invalid-email':
-            message = 'Email inválido';
-            break;
-        case 'auth/operation-not-allowed':
-            message = 'Operación no permitida';
-            break;
-        case 'auth/weak-password':
-            message = 'La contraseña es muy débil';
-            break;
-        case 'auth/user-disabled':
-            message = 'Usuario deshabilitado';
-            break;
-        case 'auth/user-not-found':
-            message = 'Usuario no encontrado';
-            break;
-        case 'auth/wrong-password':
-            message = 'Contraseña incorrecta';
-            break;
-        case 'auth/too-many-requests':
-            message = 'Demasiados intentos. Intenta más tarde';
-            break;
-        default:
-            message = error.message;
-    }
-    
-    showErrorMessage(message);
+// Show forgot password message
+function showForgotPassword() {
+    showSuccessMessage('En modo demo: Funcionalidad de recuperación de contraseña no disponible');
 }
 
 // Utility functions
@@ -345,4 +371,67 @@ function closeModal(modalId) {
     if (modal) {
         modal.style.display = 'none';
     }
+}
+
+// Show user interface (logged in state)
+function showUserInterface() {
+    const authButtons = document.getElementById('authButtons');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (authButtons) authButtons.style.display = 'none';
+    if (userMenu) userMenu.style.display = 'flex';
+}
+
+// Show auth interface (logged out state)
+function showAuthInterface() {
+    const authButtons = document.getElementById('authButtons');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (authButtons) authButtons.style.display = 'flex';
+    if (userMenu) userMenu.style.display = 'none';
+}
+
+// Update navbar based on auth state
+function updateNavbarAuth() {
+    if (currentUser) {
+        showUserInterface();
+        updateUserInterface({
+            displayName: currentUser.displayName || 'Usuario Demo',
+            level: 1,
+            points: 0
+        });
+    } else {
+        showAuthInterface();
+    }
+}
+
+// Handle authentication errors
+function handleAuthError(error) {
+    let message = 'Error de autenticación';
+    
+    if (DEMO_MODE) {
+        message = 'Error en modo demo - ' + (error.message || 'Error desconocido');
+    } else {
+        switch (error.code) {
+            case 'auth/email-already-in-use':
+                message = 'El email ya está registrado';
+                break;
+            case 'auth/invalid-email':
+                message = 'Email inválido';
+                break;
+            case 'auth/weak-password':
+                message = 'La contraseña es muy débil';
+                break;
+            case 'auth/user-not-found':
+                message = 'Usuario no encontrado';
+                break;
+            case 'auth/wrong-password':
+                message = 'Contraseña incorrecta';
+                break;
+            default:
+                message = error.message || 'Error desconocido';
+        }
+    }
+    
+    showErrorMessage(message);
 }
