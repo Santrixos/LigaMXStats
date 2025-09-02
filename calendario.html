@@ -34,13 +34,13 @@
             margin: 0 auto;
         }
 
-        .calendar-controls {
+        .jornadas-navigation {
             background: white;
             padding: 40px 0;
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }
 
-        .calendar-nav {
+        .jornadas-nav {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -48,7 +48,7 @@
             margin-bottom: 30px;
         }
 
-        .calendar-nav button {
+        .nav-btn {
             background: #2c5aa0;
             color: white;
             border: none;
@@ -63,134 +63,162 @@
             gap: 8px;
         }
 
-        .calendar-nav button:hover {
+        .nav-btn:hover {
             background: #1e3c72;
             transform: translateY(-2px);
         }
 
-        .current-month {
-            font-size: 2rem;
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .current-jornada {
+            font-size: 2.5rem;
             font-weight: 700;
             color: #2c5aa0;
+            text-align: center;
         }
 
-        .calendar-filters {
+        .jornadas-selector {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-        .filter-btn {
+        .jornada-btn {
             background: transparent;
             border: 2px solid #2c5aa0;
             color: #2c5aa0;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 25px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
 
-        .filter-btn.active, .filter-btn:hover {
+        .jornada-btn.active {
+            background: #2c5aa0;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .jornada-btn:hover {
             background: #2c5aa0;
             color: white;
         }
 
-        .calendar-grid {
-            background: white;
-            margin: 40px 0;
-        }
-
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            background: #f8f9fa;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .calendar-day-header {
-            padding: 20px 10px;
+        .jornada-dates {
             text-align: center;
-            font-weight: 700;
-            color: #2c5aa0;
-            border-right: 1px solid #e9ecef;
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
         }
 
-        .calendar-day-header:last-child {
-            border-right: none;
+        .jornada-matches {
+            padding: 40px 0;
+            background: #f8f9fa;
         }
 
-        .calendar-days {
+        .matches-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            border: 1px solid #e9ecef;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            overflow: hidden;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .calendar-day {
-            min-height: 120px;
-            padding: 15px;
-            border-right: 1px solid #e9ecef;
-            border-bottom: 1px solid #e9ecef;
-            position: relative;
+        .partido-card {
             background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
+            border-left: 5px solid #2c5aa0;
         }
 
-        .calendar-day:hover {
-            background: #f8f9fa;
+        .partido-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
-        .calendar-day:last-child {
-            border-right: none;
+        .partido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .calendar-day.other-month {
-            background: #f8f9fa;
-            color: #adb5bd;
-        }
-
-        .calendar-day.today {
-            background: linear-gradient(135deg, #2c5aa0, #1e3c72);
+        .partido-dia {
+            background: #2c5aa0;
             color: white;
-        }
-
-        .day-number {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .match-event {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 15px;
             font-weight: 600;
-            margin-bottom: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .partido-hora {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .partido-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .team-partido {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 12px;
+            flex: 1;
         }
 
-        .match-event:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        .team-logo-small {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #2c5aa0;
         }
 
-        .match-event.important {
-            background: linear-gradient(45deg, #dc3545, #fd7e14);
+        .team-name-small {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
         }
 
-        .match-event.derby {
-            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+        .vs-small {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #666;
+            padding: 0 15px;
         }
+
+        .partido-estadio {
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
 
         .upcoming-matches {
             padding: 60px 0;
@@ -317,28 +345,32 @@
                 font-size: 2.5rem;
             }
 
-            .calendar-nav {
+            .jornadas-nav {
                 flex-direction: column;
                 gap: 20px;
             }
 
-            .calendar-filters {
-                gap: 10px;
+            .current-jornada {
+                font-size: 2rem;
             }
 
-            .filter-btn {
-                padding: 8px 16px;
-                font-size: 0.9rem;
+            .jornadas-selector {
+                gap: 8px;
             }
 
-            .calendar-day {
-                min-height: 80px;
-                padding: 10px;
+            .jornada-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
             }
 
-            .match-event {
-                font-size: 0.7rem;
-                padding: 4px 6px;
+            .partido-teams {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .vs-small {
+                transform: rotate(90deg);
+                padding: 10px 0;
             }
 
             .match-header {
@@ -354,6 +386,12 @@
             .vs-indicator {
                 transform: rotate(90deg);
                 padding: 10px 0;
+            }
+            
+            .partido-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
             }
         }
     </style>
@@ -400,43 +438,34 @@
         </div>
     </section>
 
-    <!-- Calendar Controls -->
-    <section class="calendar-controls">
+    <!-- Jornadas Navigation -->
+    <section class="jornadas-navigation">
         <div class="container">
-            <div class="calendar-nav">
-                <button id="prevMonth">
+            <div class="jornadas-nav">
+                <button id="prevJornada" class="nav-btn">
                     <i class="fas fa-chevron-left"></i>
                     Anterior
                 </button>
-                <h2 class="current-month" id="currentMonth">Septiembre 2025</h2>
-                <button id="nextMonth">
+                <h2 class="current-jornada" id="currentJornada">JORNADA 1</h2>
+                <button id="nextJornada" class="nav-btn">
                     Siguiente
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
-            <div class="calendar-filters">
-                <button class="filter-btn active" data-filter="all">Todos</button>
-                <button class="filter-btn" data-filter="important">Partidos Importantes</button>
-                <button class="filter-btn" data-filter="derby">Clásicos</button>
-                <button class="filter-btn" data-filter="local">Partidos Locales</button>
+            <div class="jornadas-selector" id="jornadasSelector">
+                <!-- Jornadas buttons will be generated here -->
+            </div>
+            <div class="jornada-dates" id="jornadaDates">
+                11, 12, 13 DE JULIO / REPROGRAMADO 17 DE SEPTIEMBRE
             </div>
         </div>
     </section>
 
-    <!-- Calendar Grid -->
-    <section class="calendar-grid">
+    <!-- Jornada Matches -->
+    <section class="jornada-matches">
         <div class="container">
-            <div class="calendar-header">
-                <div class="calendar-day-header">DOM</div>
-                <div class="calendar-day-header">LUN</div>
-                <div class="calendar-day-header">MAR</div>
-                <div class="calendar-day-header">MIÉ</div>
-                <div class="calendar-day-header">JUE</div>
-                <div class="calendar-day-header">VIE</div>
-                <div class="calendar-day-header">SÁB</div>
-            </div>
-            <div class="calendar-days" id="calendarDays">
-                <!-- Días del calendario se generarán dinámicamente -->
+            <div class="matches-grid" id="matchesGrid">
+                <!-- Los partidos de la jornada se generarán aquí -->
             </div>
         </div>
     </section>
