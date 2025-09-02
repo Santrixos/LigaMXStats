@@ -8,9 +8,9 @@ import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase
 
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: window.FIREBASE_API_KEY || "AIzaSyBvOkBwNQI-GnFUF3Sa416b9S7QJXJNnyg",
+    apiKey: "AIzaSyBvOkBwNQI-GnFUF3Sa416b9S7QJXJNnyg",
     authDomain: "ligamx-daf3d.firebaseapp.com",
-    projectId: "ligamx-daf3d",
+    projectId: "ligamx-daf3d", 
     storageBucket: "ligamx-daf3d.firebasestorage.app",
     messagingSenderId: "437421248316",
     appId: "1:437421248316:web:38e9f436a57389d2c49839",

@@ -508,8 +508,8 @@
     
     <!-- Global API Key Script -->
     <script>
-        // Set the Firebase API key from environment
-        window.FIREBASE_API_KEY = '${process.env.GOOGLE_API_KEY || 'AIzaSyBvOkBwNQI-GnFUF3Sa416b9S7QJXJNnyg'}';
+        // Set the Firebase API key for client-side use
+        window.FIREBASE_API_KEY = 'AIzaSyBvOkBwNQI-GnFUF3Sa416b9S7QJXJNnyg';
     </script>
 
     <!-- Firebase Configuration -->
@@ -518,10 +518,10 @@
     <!-- Enhanced Main Scripts -->
     <script type="module">
         import { initAuth } from './js/auth.js';
-        import { initMatchLinks, setupCommentForm } from './js/match-links.js';
+        import { initMatchLinks } from './js/match-links.js';
         import { initNotifications } from './js/notifications.js';
         import { initUserProfiles } from './js/user-profiles.js';
-        import { initComments } from './js/comments.js';
+        import { initComments, setupCommentForm } from './js/comments.js';
         
         // Initialize all Firebase systems
         document.addEventListener('DOMContentLoaded', function() {
@@ -585,38 +585,42 @@
         };
         
         // Setup form handlers
-        document.addEventListener('DOMContentLoaded', () => {
-            const { loginUser, registerUser, signInWithGoogle } = await import('./js/auth.js');
-            
-            // Login form
-            const loginForm = document.getElementById('loginFormElement');
-            if (loginForm) {
-                loginForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('loginEmail').value;
-                    const password = document.getElementById('loginPassword').value;
-                    await loginUser(email, password);
-                });
+        setTimeout(async () => {
+            try {
+                const { loginUser, registerUser, signInWithGoogle } = await import('./js/auth.js');
+                
+                // Login form
+                const loginForm = document.getElementById('loginFormElement');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const email = document.getElementById('loginEmail').value;
+                        const password = document.getElementById('loginPassword').value;
+                        await loginUser(email, password);
+                    });
+                }
+                
+                // Register form
+                const registerForm = document.getElementById('registerFormElement');
+                if (registerForm) {
+                    registerForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const name = document.getElementById('registerName').value;
+                        const email = document.getElementById('registerEmail').value;
+                        const password = document.getElementById('registerPassword').value;
+                        const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
+                        await registerUser(email, password, name, favoriteTeam);
+                    });
+                }
+                
+                // Google sign in
+                window.signInWithGoogle = async function() {
+                    await signInWithGoogle();
+                };
+            } catch (error) {
+                console.log('Form handlers setup later:', error);
             }
-            
-            // Register form
-            const registerForm = document.getElementById('registerFormElement');
-            if (registerForm) {
-                registerForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const name = document.getElementById('registerName').value;
-                    const email = document.getElementById('registerEmail').value;
-                    const password = document.getElementById('registerPassword').value;
-                    const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
-                    await registerUser(email, password, name, favoriteTeam);
-                });
-            }
-            
-            // Google sign in
-            window.signInWithGoogle = async function() {
-                await signInWithGoogle();
-            };
-        });
+        }, 2000);
     </script>
     
     <!-- Original main.js -->
