@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="css/firebase-features.css?v=2024091801">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
     <!-- Header Navigation -->
@@ -674,23 +680,28 @@
     
     <!-- Setup form handlers -->
     <script>
-        // Simple demo mode handlers without Firebase
+        // Real Firebase authentication handlers
         
         // Login form
         const loginForm = document.getElementById('loginFormElement');
         if (loginForm) {
-            loginForm.addEventListener('submit', function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
                 
                 if (email && password) {
-                    // Simulate login success
-                    setTimeout(() => {
-                        showSuccessMessage('¡Bienvenido de vuelta en modo demo!');
-                        closeAuthModal();
-                        showUserLoggedIn(email);
-                    }, 1000);
+                    if (window.signInWithEmail) {
+                        const result = await window.signInWithEmail(email, password);
+                        if (result.success) {
+                            showSuccessMessage('¡Bienvenido de vuelta!');
+                            closeAuthModal();
+                        } else {
+                            showErrorMessage(result.error || 'Error al iniciar sesión');
+                        }
+                    } else {
+                        showErrorMessage('Sistema de autenticación no disponible');
+                    }
                 } else {
                     showErrorMessage('Por favor completa todos los campos');
                 }
@@ -700,19 +711,25 @@
         // Register form
         const registerForm = document.getElementById('registerFormElement');
         if (registerForm) {
-            registerForm.addEventListener('submit', function(e) {
+            registerForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const name = document.getElementById('registerName').value;
                 const email = document.getElementById('registerEmail').value;
                 const password = document.getElementById('registerPassword').value;
+                const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
                 
                 if (name && email && password) {
-                    // Simulate registration success
-                    setTimeout(() => {
-                        showSuccessMessage('¡Cuenta creada exitosamente en modo demo!');
-                        closeAuthModal();
-                        showUserLoggedIn(email, name);
-                    }, 1000);
+                    if (window.signUpWithEmail) {
+                        const result = await window.signUpWithEmail(email, password, name, favoriteTeam);
+                        if (result.success) {
+                            showSuccessMessage('¡Cuenta creada exitosamente!');
+                            closeAuthModal();
+                        } else {
+                            showErrorMessage(result.error || 'Error al crear la cuenta');
+                        }
+                    } else {
+                        showErrorMessage('Sistema de autenticación no disponible');
+                    }
                 } else {
                     showErrorMessage('Por favor completa todos los campos');
                 }
@@ -720,12 +737,21 @@
         }
         
         // Google sign in
-        window.signInWithGoogle = function() {
-            setTimeout(() => {
-                showSuccessMessage('¡Bienvenido con Google en modo demo!');
-                closeAuthModal();
-                showUserLoggedIn('demo@google.com', 'Usuario Google Demo');
-            }, 1000);
+        window.signInWithGoogle = async function() {
+            if (window.signInWithGoogle && window.auth) {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const result = await window.auth.signInWithPopup(provider);
+                    if (result.user) {
+                        showSuccessMessage('¡Bienvenido con Google!');
+                        closeAuthModal();
+                    }
+                } catch (error) {
+                    showErrorMessage('Error al iniciar sesión con Google: ' + error.message);
+                }
+            } else {
+                showErrorMessage('Google Sign-In no disponible');
+            }
         };
         
         // Show user as logged in
