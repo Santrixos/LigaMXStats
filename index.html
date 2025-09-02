@@ -627,7 +627,6 @@
                 console.log('Firebase loading in demo mode');
             }
         }, 2000);
-    </script>
         
         // Global functions for authentication modal
         window.openAuthModal = function(mode = 'login') {
@@ -667,7 +666,10 @@
             const userMenu = document.getElementById('userMenu');
             userMenu.classList.toggle('dropdown-open');
         };
-        
+    </script>
+    
+    <!-- Setup form handlers -->
+    <script>
         // Setup form handlers
         setTimeout(async () => {
             try {
