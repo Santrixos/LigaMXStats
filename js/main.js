@@ -16,6 +16,7 @@ function initializeApp() {
     setupCounterAnimations();
     setupThemeSystem();
     setupAdvancedFeatures();
+    setupUserInterface();
 }
 
 // Navigation functionality
@@ -498,6 +499,159 @@ function setupDataVisualization() {
     // Could be expanded with chart libraries in the future
     console.log('Data visualization system initialized');
 }
+
+// User Interface Setup
+function setupUserInterface() {
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const userMenu = document.querySelector('.user-menu');
+        const dropdown = document.getElementById('profileDropdown');
+        
+        if (userMenu && !userMenu.contains(event.target)) {
+            if (dropdown) {
+                dropdown.style.display = 'none';
+            }
+        }
+    });
+    
+    // Setup authentication forms
+    setupAuthForms();
+}
+
+// Toggle profile dropdown
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    const icon = document.getElementById('dropdownIcon');
+    
+    if (dropdown) {
+        if (dropdown.style.display === 'none' || !dropdown.style.display) {
+            dropdown.style.display = 'block';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+        } else {
+            dropdown.style.display = 'none';
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+    }
+}
+
+// User profile functions
+function openUserProfile() {
+    window.location.href = 'user-profile.html';
+}
+
+function openUserPreferences() {
+    console.log('Opening preferences...');
+}
+
+function openUserFavorites() {
+    console.log('Opening favorites...');
+}
+
+function openUserStats() {
+    console.log('Opening user stats...');
+}
+
+// Authentication modal functions
+function openAuthModal(mode) {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        showAuthTab(mode);
+    }
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function showAuthTab(tab) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const modalTitle = document.getElementById('authModalTitle');
+    
+    if (tab === 'login') {
+        if (loginForm) loginForm.style.display = 'block';
+        if (registerForm) registerForm.style.display = 'none';
+        if (loginTab) loginTab.classList.add('active');
+        if (registerTab) registerTab.classList.remove('active');
+        if (modalTitle) modalTitle.textContent = 'Iniciar Sesión';
+    } else {
+        if (loginForm) loginForm.style.display = 'none';
+        if (registerForm) registerForm.style.display = 'block';
+        if (loginTab) loginTab.classList.remove('active');
+        if (registerTab) registerTab.classList.add('active');
+        if (modalTitle) modalTitle.textContent = 'Crear Cuenta';
+    }
+}
+
+// Setup authentication forms
+function setupAuthForms() {
+    const loginForm = document.getElementById('loginFormElement');
+    const registerForm = document.getElementById('registerFormElement');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (window.signInWithEmail) {
+                const result = await window.signInWithEmail(email, password);
+                if (result.success) {
+                    closeAuthModal();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            }
+        });
+    }
+    
+    if (registerForm) {
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
+            
+            if (window.signUpWithEmail) {
+                const result = await window.signUpWithEmail(email, password, name, favoriteTeam);
+                if (result.success) {
+                    closeAuthModal();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            }
+        });
+    }
+}
+
+// Global logout function
+window.logoutUser = async function() {
+    if (window.signOutUser) {
+        const result = await window.signOutUser();
+        if (result.success) {
+            window.location.href = 'index.html';
+        }
+    }
+};
+
+// Make functions globally available
+window.toggleProfileDropdown = toggleProfileDropdown;
+window.openUserProfile = openUserProfile;
+window.openUserPreferences = openUserPreferences;
+window.openUserFavorites = openUserFavorites;
+window.openUserStats = openUserStats;
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.showAuthTab = showAuthTab;
 
 // Enhanced Search Functionality
 function setupSearchFunctionality() {
