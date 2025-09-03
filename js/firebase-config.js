@@ -76,6 +76,19 @@ if (typeof firebase !== 'undefined') {
                 return { success: true, user: result.user };
             } catch (error) {
                 console.error('Google sign-in error:', error);
+                
+                // Specific domain error handling
+                if (error.code === 'auth/unauthorized-domain') {
+                    const currentDomain = window.location.hostname;
+                    console.error(`❌ Domain not authorized: ${currentDomain}`);
+                    console.error('📋 Add this domain to Firebase Console > Authentication > Settings > Authorized domains');
+                    console.error(`🔗 Current domain: ${window.location.origin}`);
+                    return { 
+                        success: false, 
+                        error: `Dominio no autorizado: ${currentDomain}. Agrega este dominio en Firebase Console > Authentication > Settings > Authorized domains.` 
+                    };
+                }
+                
                 return { success: false, error: error.message };
             }
         };
