@@ -84,6 +84,11 @@ The application follows an enhanced multi-page static website architecture with 
 - **Font Awesome 6.0.0**: Icon library for consistent iconography throughout the application
 - **Google Fonts (Roboto)**: Typography system for better readability and visual consistency
 
+### Firebase Integration
+- **Firebase Authentication**: Real user authentication with email/password and Google Sign-In
+- **Firestore Database**: Real-time user profiles, preferences, and statistics storage
+- **Firebase Storage**: User avatar and file storage capabilities
+
 ### Data Sources
 - **Static JSON Files**: Self-contained data files for teams, standings, and fixtures information
 - **SVG Assets**: Vector graphics for team logos and league branding stored in `/assets` directory
@@ -91,4 +96,10 @@ The application follows an enhanced multi-page static website architecture with 
 ### Browser APIs
 - **Local Storage API**: For persisting user preferences and selected team data
 - **URL Parameters API**: For handling team profile routing and deep linking
-- **Intersection Observer API**: Potential use for scroll-based animations and lazy loading
+- **Intersection Observer API**: For scroll-based animations and lazy loading
+
+## Production Deployment
+- **GitHub Pages Compatible**: Fully static website that works perfectly with GitHub Pages
+- **Firebase Real Mode**: Configured with real Firebase credentials for production use
+- **Responsive Design**: Optimized for all devices (mobile, tablet, desktop)
+- **Performance Optimized**: Lazy loading, efficient caching, and CDN resources

@@ -79,13 +79,10 @@ if (typeof firebase !== 'undefined') {
                 
                 // Specific domain error handling
                 if (error.code === 'auth/unauthorized-domain') {
-                    const currentDomain = window.location.hostname;
-                    console.error(`❌ Domain not authorized: ${currentDomain}`);
-                    console.error('📋 Add this domain to Firebase Console > Authentication > Settings > Authorized domains');
-                    console.error(`🔗 Current domain: ${window.location.origin}`);
+                    console.error('❌ Domain not authorized for Google Sign-In');
                     return { 
                         success: false, 
-                        error: `Dominio no autorizado: ${currentDomain}. Agrega este dominio en Firebase Console > Authentication > Settings > Authorized domains.` 
+                        error: 'Este dominio necesita ser autorizado en Firebase Console para usar Google Sign-In.' 
                     };
                 }
                 
