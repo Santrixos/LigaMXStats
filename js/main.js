@@ -16,7 +16,12 @@ function initializeApp() {
     setupCounterAnimations();
     setupThemeSystem();
     setupAdvancedFeatures();
-    setupUserInterface();
+    // Initialize user interface after DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupUserInterface);
+    } else {
+        setupUserInterface();
+    }
 }
 
 // Navigation functionality
