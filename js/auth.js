@@ -1,163 +1,96 @@
-// Authentication System for Liga MX UltraGol - Demo Mode
-import { auth, db } from './firebase-config.js';
-
-// Demo mode - create mock functions for Firebase auth
-const DEMO_MODE = true;
-
-// Mock Firebase auth functions for demo
-const createUserWithEmailAndPassword = DEMO_MODE ? 
-    (auth, email, password) => Promise.resolve({ user: { uid: 'demo-user', email, displayName: null } }) :
-    null;
-
-const signInWithEmailAndPassword = DEMO_MODE ? 
-    (auth, email, password) => Promise.resolve({ user: { uid: 'demo-user', email, displayName: 'Usuario Demo' } }) :
-    null;
-
-const signOut = DEMO_MODE ? 
-    (auth) => Promise.resolve() :
-    null;
-
-const sendPasswordResetEmail = DEMO_MODE ? 
-    (auth, email) => Promise.resolve() :
-    null;
-
-const updateProfile = DEMO_MODE ? 
-    (user, profile) => Promise.resolve() :
-    null;
-
-const signInWithPopup = DEMO_MODE ? 
-    (auth, provider) => Promise.resolve({ user: { uid: 'demo-google-user', email: 'demo@google.com', displayName: 'Usuario Google Demo' } }) :
-    null;
-
-// Mock Google provider for demo
-const googleProvider = DEMO_MODE ? {} : null;
-
-// Mock Firestore functions for demo
-const doc = DEMO_MODE ? 
-    (db, collection, id) => ({ collection, id }) :
-    null;
-
-const setDoc = DEMO_MODE ? 
-    (ref, data) => Promise.resolve() :
-    null;
-
-const getDoc = DEMO_MODE ? 
-    (ref) => Promise.resolve({ exists: () => false, data: () => null }) :
-    null;
-
-const updateDoc = DEMO_MODE ? 
-    (ref, data) => Promise.resolve() :
-    null;
-
-const serverTimestamp = DEMO_MODE ? 
-    () => new Date() :
-    null;
+// Authentication System for Liga MX UltraGol - REAL MODE
+console.log('Real-time authentication system loading...');
 
 // Current user state
 export let currentUser = null;
 
 // Initialize auth system
 export function initAuth() {
-    // Check auth state
-    auth.onAuthStateChanged(async (user) => {
+    console.log('Real-time updates system initialized (static mode)');
+    
+    // Check if Firebase is available
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+        console.log('⚠️ Firebase not loaded, using static mode');
+        showAuthInterface();
+        return;
+    }
+
+    // Real Firebase auth state observer
+    firebase.auth().onAuthStateChanged(async (user) => {
         currentUser = user;
         if (user) {
-            // User is signed in
+            console.log('✅ User authenticated:', user.displayName || user.email);
             await createOrUpdateUserProfile(user);
             showUserInterface();
             loadUserProfile();
         } else {
-            // User is signed out
+            console.log('❌ User not authenticated');
             showAuthInterface();
         }
         updateNavbarAuth();
     });
 }
 
-// Register new user
+// Register new user with Firebase
 export async function registerUser(email, password, displayName, favoriteTeam) {
     try {
         showLoading('Creando cuenta...');
         
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        // Use global Firebase functions from firebase-config.js
+        const result = await window.signUpWithEmail(email, password, displayName, favoriteTeam);
         
-        // Update display name
-        await updateProfile(user, { displayName });
-        
-        // Create user profile in Firestore
-        await createUserProfile(user, { favoriteTeam });
-        
-        hideLoading();
-        showSuccessMessage('¡Cuenta creada exitosamente en modo demo!');
-        closeModal('authModal');
-        
-        // In demo mode, simulate login
-        if (DEMO_MODE) {
-            currentUser = { ...user, displayName: displayName };
-            setTimeout(() => {
-                showUserInterface();
-                updateNavbarAuth();
-            }, 500);
+        if (result.success) {
+            hideLoading();
+            showSuccessMessage('¡Cuenta creada exitosamente!');
+            closeModal('authModal');
+            return result.user;
+        } else {
+            throw new Error(result.error);
         }
-        
-        return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
     }
 }
 
-// Login user
+// Login user with Firebase
 export async function loginUser(email, password) {
     try {
         showLoading('Iniciando sesión...');
         
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        // Use global Firebase functions from firebase-config.js
+        const result = await window.signInWithEmail(email, password);
         
-        hideLoading();
-        showSuccessMessage('¡Bienvenido de vuelta en modo demo!');
-        closeModal('authModal');
-        
-        // In demo mode, simulate login
-        if (DEMO_MODE) {
-            currentUser = { ...user, displayName: user.displayName || 'Usuario Demo' };
-            setTimeout(() => {
-                showUserInterface();
-                updateNavbarAuth();
-            }, 500);
+        if (result.success) {
+            hideLoading();
+            showSuccessMessage('¡Bienvenido de vuelta!');
+            closeModal('authModal');
+            return result.user;
+        } else {
+            throw new Error(result.error);
         }
-        
-        return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
     }
 }
 
-// Google sign in
+// Google Sign In
 export async function signInWithGoogle() {
     try {
         showLoading('Conectando con Google...');
         
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
+        // Use global Firebase functions from firebase-config.js
+        const result = await window.signInWithGoogle();
         
-        hideLoading();
-        showSuccessMessage('¡Bienvenido en modo demo!');
-        closeModal('authModal');
-        
-        // In demo mode, simulate login
-        if (DEMO_MODE) {
-            currentUser = { ...user, displayName: user.displayName || 'Usuario Google Demo' };
-            setTimeout(() => {
-                showUserInterface();
-                updateNavbarAuth();
-            }, 500);
+        if (result.success) {
+            hideLoading();
+            showSuccessMessage('¡Conectado con Google exitosamente!');
+            closeModal('authModal');
+            return result.user;
+        } else {
+            throw new Error(result.error);
         }
-        
-        return user;
     } catch (error) {
         hideLoading();
         handleAuthError(error);
@@ -167,136 +100,117 @@ export async function signInWithGoogle() {
 // Logout user
 export async function logoutUser() {
     try {
-        await signOut(auth);
-        showSuccessMessage('Sesión cerrada correctamente');
-        currentUser = null;
+        showLoading('Cerrando sesión...');
+        
+        // Use global Firebase functions from firebase-config.js
+        const result = await window.signOutUser();
+        
+        if (result.success) {
+            hideLoading();
+            showSuccessMessage('Sesión cerrada correctamente');
+            currentUser = null;
+            showAuthInterface();
+            updateNavbarAuth();
+        } else {
+            throw new Error(result.error);
+        }
     } catch (error) {
-        console.error('Logout error:', error);
-        showErrorMessage('Error al cerrar sesión');
+        hideLoading();
+        handleAuthError(error);
     }
 }
 
 // Reset password
 export async function resetPassword(email) {
     try {
-        await sendPasswordResetEmail(auth, email);
-        showSuccessMessage('Revisa tu email para restablecer tu contraseña');
+        showLoading('Enviando email de recuperación...');
+        
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+            throw new Error('Firebase no está disponible');
+        }
+
+        await firebase.auth().sendPasswordResetEmail(email);
+        
+        hideLoading();
+        showSuccessMessage('Email de recuperación enviado. Revisa tu bandeja de entrada.');
+        closeModal('authModal');
     } catch (error) {
+        hideLoading();
         handleAuthError(error);
-        throw error;
     }
 }
 
-// Create user profile in Firestore
-async function createUserProfile(user, additionalData = {}) {
+// Create or update user profile in Firestore
+async function createOrUpdateUserProfile(user) {
+    if (!window.db || !user) return;
+    
     try {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
+        const userRef = window.db.collection('users').doc(user.uid);
+        const snapshot = await userRef.get();
         
-        if (!userSnap.exists()) {
-            const userData = {
-                uid: user.uid,
+        if (!snapshot.exists) {
+            // Create new user profile
+            await userRef.set({
+                displayName: user.displayName || 'Usuario',
                 email: user.email,
-                displayName: user.displayName || '',
-                favoriteTeam: additionalData.favoriteTeam || '',
-                profilePicture: user.photoURL || '',
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
+                photoURL: user.photoURL || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 level: 1,
-                experience: 0,
                 points: 0,
+                favoriteTeam: '',
                 badges: [],
-                predictions: [],
-                sharedLinks: [],
-                notifications: true,
-                bio: '',
-                location: '',
-                achievements: {
-                    firstLogin: true,
-                    profileComplete: false,
-                    firstPrediction: false,
-                    firstSharedLink: false
+                preferences: {
+                    notifications: true,
+                    theme: 'auto',
+                    language: 'es'
                 },
                 stats: {
-                    correctPredictions: 0,
-                    totalPredictions: 0,
-                    linksShared: 0,
-                    commentsPosted: 0
+                    predictionsCorrect: 0,
+                    predictionsTotal: 0,
+                    commentsCount: 0,
+                    articlesRead: 0
                 }
-            };
-            
-            await setDoc(userRef, userData);
-            console.log('User profile created');
-        }
-    } catch (error) {
-        console.error('Error creating user profile:', error);
-    }
-}
-
-// Update existing user profile
-async function createOrUpdateUserProfile(user) {
-    try {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-            // Update existing profile
-            await updateDoc(userRef, {
-                email: user.email,
-                displayName: user.displayName || userSnap.data().displayName,
-                profilePicture: user.photoURL || userSnap.data().profilePicture,
-                updatedAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
             });
+            console.log('✅ User profile created');
         } else {
-            // Create new profile
-            await createUserProfile(user);
+            // Update existing profile
+            await userRef.update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                displayName: user.displayName || snapshot.data().displayName
+            });
+            console.log('✅ User profile updated');
         }
     } catch (error) {
-        console.error('Error updating user profile:', error);
+        console.error('❌ Error managing user profile:', error);
     }
 }
 
 // Load user profile data
-export async function loadUserProfile() {
-    if (!currentUser) return null;
+async function loadUserProfile() {
+    if (!window.db || !currentUser) return;
     
     try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            updateUserInterface(userData);
-            return userData;
+        const userDoc = await window.db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            
+            // Update UI with user data
+            const userLevel = document.getElementById('userLevel');
+            const userPoints = document.getElementById('userPoints');
+            const userDisplayName = document.getElementById('userDisplayName');
+            
+            if (userLevel) userLevel.textContent = userData.level || 1;
+            if (userPoints) userPoints.textContent = userData.points || 0;
+            if (userDisplayName) userDisplayName.textContent = userData.displayName || 'Usuario';
+            
+            console.log('✅ User profile loaded');
         }
     } catch (error) {
-        console.error('Error loading user profile:', error);
+        console.error('❌ Error loading user profile:', error);
     }
-    return null;
 }
 
-// Update user interface with user data
-function updateUserInterface(userData) {
-    // Update navbar
-    const userNameEl = document.getElementById('userDisplayName');
-    const userAvatarEl = document.getElementById('userAvatar');
-    const userPointsEl = document.getElementById('userPoints');
-    const userLevelEl = document.getElementById('userLevel');
-    
-    if (userNameEl) userNameEl.textContent = userData.displayName || 'Usuario';
-    if (userAvatarEl) {
-        if (userData.profilePicture) {
-            userAvatarEl.innerHTML = `<img src="${userData.profilePicture}" alt="Avatar" class="user-avatar-img">`;
-        } else {
-            userAvatarEl.innerHTML = `<i class="fas fa-user"></i>`;
-        }
-    }
-    if (userPointsEl) userPointsEl.textContent = userData.points || 0;
-    if (userLevelEl) userLevelEl.textContent = userData.level || 1;
-}
-
-// Show user interface (logged in)
+// UI Functions
 function showUserInterface() {
     const authButtons = document.getElementById('authButtons');
     const userMenu = document.getElementById('userMenu');
@@ -305,7 +219,6 @@ function showUserInterface() {
     if (userMenu) userMenu.style.display = 'flex';
 }
 
-// Show auth interface (logged out)
 function showAuthInterface() {
     const authButtons = document.getElementById('authButtons');
     const userMenu = document.getElementById('userMenu');
@@ -314,56 +227,83 @@ function showAuthInterface() {
     if (userMenu) userMenu.style.display = 'none';
 }
 
-// Update navbar auth state
 function updateNavbarAuth() {
-    const navbar = document.querySelector('.navbar');
+    // Update navigation based on auth state
+    const navLinks = document.querySelectorAll('.nav-link');
     if (currentUser) {
-        navbar.classList.add('user-logged-in');
-    } else {
-        navbar.classList.remove('user-logged-in');
+        // User is logged in - enable all features
+        navLinks.forEach(link => {
+            link.style.opacity = '1';
+            link.style.pointerEvents = 'auto';
+        });
     }
 }
 
-// Show forgot password message
-function showForgotPassword() {
-    showSuccessMessage('En modo demo: Funcionalidad de recuperación de contraseña no disponible');
+// Error handling
+function handleAuthError(error) {
+    console.error('Authentication error:', error);
+    
+    let message = 'Error de autenticación';
+    
+    if (error.code) {
+        switch (error.code) {
+            case 'auth/invalid-email':
+                message = 'Email inválido';
+                break;
+            case 'auth/user-disabled':
+                message = 'Usuario deshabilitado';
+                break;
+            case 'auth/user-not-found':
+                message = 'Usuario no encontrado';
+                break;
+            case 'auth/wrong-password':
+                message = 'Contraseña incorrecta';
+                break;
+            case 'auth/email-already-in-use':
+                message = 'Este email ya está en uso';
+                break;
+            case 'auth/weak-password':
+                message = 'La contraseña debe tener al menos 6 caracteres';
+                break;
+            case 'auth/network-request-failed':
+                message = 'Error de conexión. Verifica tu internet.';
+                break;
+            case 'auth/unauthorized-domain':
+                message = 'Dominio no autorizado para autenticación';
+                break;
+            default:
+                message = error.message || 'Error desconocido';
+        }
+    }
+    
+    showErrorMessage(message);
 }
 
-// Utility functions
-function showLoading(message = 'Cargando...') {
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'authLoading';
-    loadingEl.className = 'auth-loading';
-    loadingEl.innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>${message}</p>
-    `;
-    document.body.appendChild(loadingEl);
+// Loading functions
+function showLoading(message) {
+    const loadingEl = document.getElementById('loadingMessage');
+    if (loadingEl) {
+        loadingEl.textContent = message;
+        loadingEl.style.display = 'block';
+    }
 }
 
 function hideLoading() {
-    const loadingEl = document.getElementById('authLoading');
+    const loadingEl = document.getElementById('loadingMessage');
     if (loadingEl) {
-        document.body.removeChild(loadingEl);
+        loadingEl.style.display = 'none';
     }
 }
 
+// Message functions
 function showSuccessMessage(message) {
-    // Reuse the existing showSuccessMessage function from main.js
-    if (window.showSuccessMessage) {
-        window.showSuccessMessage(message);
-    } else {
-        alert(message);
-    }
+    console.log('✅ Success:', message);
+    // Add visual success notification here
 }
 
 function showErrorMessage(message) {
-    // Reuse the existing showErrorMessage function from main.js
-    if (window.showErrorMessage) {
-        window.showErrorMessage(message);
-    } else {
-        alert(message);
-    }
+    console.error('❌ Error:', message);
+    alert(message); // Simple alert for now
 }
 
 function closeModal(modalId) {
@@ -373,65 +313,7 @@ function closeModal(modalId) {
     }
 }
 
-// Show user interface (logged in state)
-function showUserInterface() {
-    const authButtons = document.getElementById('authButtons');
-    const userMenu = document.getElementById('userMenu');
-    
-    if (authButtons) authButtons.style.display = 'none';
-    if (userMenu) userMenu.style.display = 'flex';
-}
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', initAuth);
 
-// Show auth interface (logged out state)
-function showAuthInterface() {
-    const authButtons = document.getElementById('authButtons');
-    const userMenu = document.getElementById('userMenu');
-    
-    if (authButtons) authButtons.style.display = 'flex';
-    if (userMenu) userMenu.style.display = 'none';
-}
-
-// Update navbar based on auth state
-function updateNavbarAuth() {
-    if (currentUser) {
-        showUserInterface();
-        updateUserInterface({
-            displayName: currentUser.displayName || 'Usuario Demo',
-            level: 1,
-            points: 0
-        });
-    } else {
-        showAuthInterface();
-    }
-}
-
-// Handle authentication errors
-function handleAuthError(error) {
-    let message = 'Error de autenticación';
-    
-    if (DEMO_MODE) {
-        message = 'Error en modo demo - ' + (error.message || 'Error desconocido');
-    } else {
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                message = 'El email ya está registrado';
-                break;
-            case 'auth/invalid-email':
-                message = 'Email inválido';
-                break;
-            case 'auth/weak-password':
-                message = 'La contraseña es muy débil';
-                break;
-            case 'auth/user-not-found':
-                message = 'Usuario no encontrado';
-                break;
-            case 'auth/wrong-password':
-                message = 'Contraseña incorrecta';
-                break;
-            default:
-                message = error.message || 'Error desconocido';
-        }
-    }
-    
-    showErrorMessage(message);
-}
+console.log('✅ Real authentication system loaded');
