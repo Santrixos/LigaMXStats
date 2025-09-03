@@ -1847,6 +1847,341 @@ function closeModal(modalId) {
     }
 }
 
+// ====== ENHANCED COMMENT AND STREAM SHARING FUNCTIONALITY ======
+
+// Quick Share Modal Function
+window.openQuickShareModal = function() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'quickShareModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> ➕ Compartir Link de Transmisión</h2>
+                <button class="close-modal" onclick="closeModal('quickShareModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="quick-share-form">
+                    <div class="form-group">
+                        <label>🏆 Partido</label>
+                        <input type="text" id="quickMatchName" placeholder="Ej: América vs Chivas - Clásico Nacional">
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 URL de Transmisión</label>
+                        <input type="url" id="quickStreamUrl" placeholder="https://ejemplo.com/stream">
+                    </div>
+                    <div class="form-group">
+                        <label>⭐ Calidad de Transmisión</label>
+                        <select id="quickStreamQuality">
+                            <option value="5">⭐⭐⭐⭐⭐ Excelente (HD/4K)</option>
+                            <option value="4">⭐⭐⭐⭐ Muy buena (HD)</option>
+                            <option value="3">⭐⭐⭐ Buena (SD)</option>
+                            <option value="2">⭐⭐ Regular</option>
+                            <option value="1">⭐ Baja calidad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🌐 Idioma</label>
+                        <select id="quickStreamLanguage">
+                            <option value="español">🇲🇽 Español</option>
+                            <option value="english">🇺🇸 English</option>
+                            <option value="portugues">🇧🇷 Português</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>💬 Comentarios adicionales (opcional)</label>
+                        <textarea id="quickStreamComments" placeholder="Información adicional sobre este stream (estabilidad, popups, etc.)..." rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary btn-large" onclick="submitQuickShare()">
+                            <i class="fas fa-share-alt"></i>
+                            🚀 Compartir Link (+10 puntos)
+                        </button>
+                        <button class="btn btn-outline" onclick="closeModal('quickShareModal')">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+};
+
+// Submit Quick Share
+window.submitQuickShare = async function() {
+    const matchName = document.getElementById('quickMatchName').value;
+    const streamUrl = document.getElementById('quickStreamUrl').value;
+    const quality = document.getElementById('quickStreamQuality').value;
+    const language = document.getElementById('quickStreamLanguage').value;
+    const comments = document.getElementById('quickStreamComments').value;
+    
+    if (!matchName || !streamUrl) {
+        alert('Por favor completa al menos el partido y la URL del stream');
+        return;
+    }
+    
+    try {
+        new URL(streamUrl);
+    } catch (e) {
+        alert('Por favor ingresa una URL válida');
+        return;
+    }
+    
+    try {
+        const linkData = {
+            matchName: matchName.trim(),
+            streamUrl: streamUrl.trim(),
+            quality: parseInt(quality),
+            language: language,
+            comments: comments.trim(),
+            sharedBy: getCurrentUserName() || 'Usuario Anónimo',
+            sharedAt: new Date().toISOString(),
+            upvotes: 0,
+            downvotes: 0,
+            id: Date.now().toString()
+        };
+        
+        const savedLinks = JSON.parse(localStorage.getItem('streamLinks') || '[]');
+        savedLinks.unshift(linkData);
+        localStorage.setItem('streamLinks', JSON.stringify(savedLinks));
+        
+        alert('¡Link compartido exitosamente! 🎉\\n+10 puntos ganados');
+        closeModal('quickShareModal');
+        updateStreamStats();
+        
+    } catch (error) {
+        console.error('Error sharing link:', error);
+        alert('Error al compartir el link. Inténtalo de nuevo.');
+    }
+};
+
+// View Shared Links
+window.viewSharedLinks = function() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'viewLinksModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-list"></i> 📋 Links Compartidos</h2>
+                <button class="close-modal" onclick="closeModal('viewLinksModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="shared-links-container" id="sharedLinksContainer">
+                    <!-- Links will be loaded here -->
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+    loadSharedLinks();
+};
+
+// Load shared links
+function loadSharedLinks() {
+    const container = document.getElementById('sharedLinksContainer');
+    if (!container) return;
+    
+    const links = JSON.parse(localStorage.getItem('streamLinks') || '[]');
+    
+    if (links.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-link fa-3x" style="color: #ccc; margin-bottom: 20px;"></i>
+                <h3>No hay links compartidos aún</h3>
+                <p>¡Sé el primero en compartir un link de transmisión!</p>
+                <button class="btn btn-primary" onclick="closeModal('viewLinksModal'); openQuickShareModal();">
+                    <i class="fas fa-plus"></i> Compartir Primer Link
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    links.sort((a, b) => new Date(b.sharedAt) - new Date(a.sharedAt));
+    container.innerHTML = links.map(link => createLinkCard(link)).join('');
+}
+
+// Create link card
+function createLinkCard(link) {
+    const qualityStars = '⭐'.repeat(link.quality);
+    const timeAgo = getTimeAgo(link.sharedAt);
+    const languageFlag = link.language === 'español' ? '🇲🇽' : link.language === 'english' ? '🇺🇸' : '🇧🇷';
+    
+    return `
+        <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid #e9ecef; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="margin: 0; color: #2c5aa0; font-size: 1.1rem;">${link.matchName}</h4>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span style="color: #FFD700;">${qualityStars}</span>
+                    <span style="background: rgba(255,153,51,0.2); color: #ff9933; padding: 3px 8px; border-radius: 12px; font-size: 11px;">${languageFlag} ${link.language}</span>
+                </div>
+            </div>
+            ${link.comments ? `<p style="color: #666; margin-bottom: 10px;">${link.comments}</p>` : ''}
+            <div style="display: flex; gap: 20px; font-size: 0.9rem; color: #999; margin-bottom: 15px;">
+                <span>📤 Por: ${link.sharedBy}</span>
+                <span>🕐 ${timeAgo}</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="${link.streamUrl}" target="_blank" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                    <i class="fas fa-play"></i> 📺 Ver Stream
+                </a>
+                <button style="border: 1px solid #e1e1e1; background: none; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer;">
+                    👍 ${link.upvotes || 0}
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Setup community comments
+function setupCommunityComments() {
+    const commentForm = document.getElementById('communityCommentForm');
+    const commentText = document.getElementById('commentText');
+    const commentCharCount = document.getElementById('commentCharCount');
+    
+    if (commentText && commentCharCount) {
+        commentText.addEventListener('input', function() {
+            commentCharCount.textContent = this.value.length;
+            if (this.value.length > 450) {
+                commentCharCount.style.color = '#dc3545';
+            } else {
+                commentCharCount.style.color = '#666';
+            }
+        });
+    }
+    
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitCommunityComment();
+        });
+    }
+}
+
+// Submit community comment
+async function submitCommunityComment() {
+    const commentText = document.getElementById('commentText').value.trim();
+    
+    if (!commentText) {
+        alert('Por favor escribe un comentario');
+        return;
+    }
+    
+    const commentData = {
+        text: commentText,
+        author: getCurrentUserName() || 'Usuario Anónimo',
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        id: Date.now().toString()
+    };
+    
+    const savedComments = JSON.parse(localStorage.getItem('communityComments') || '[]');
+    savedComments.unshift(commentData);
+    localStorage.setItem('communityComments', JSON.stringify(savedComments));
+    
+    document.getElementById('commentText').value = '';
+    document.getElementById('commentCharCount').textContent = '0';
+    
+    alert('¡Comentario publicado! 🎉\\n+5 puntos ganados');
+    loadCommunityComments();
+}
+
+// Clear comment form
+window.clearCommentForm = function() {
+    document.getElementById('commentText').value = '';
+    document.getElementById('commentCharCount').textContent = '0';
+};
+
+// Enhanced utility functions
+function getCurrentUserName() {
+    if (window.auth && window.auth.currentUser) {
+        return window.auth.currentUser.displayName || window.auth.currentUser.email;
+    }
+    return localStorage.getItem('currentUserName') || null;
+}
+
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const commentTime = new Date(timestamp);
+    const diffInMinutes = Math.floor((now - commentTime) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Hace un momento';
+    if (diffInMinutes < 60) return `Hace ${diffInMinutes} minuto${diffInMinutes > 1 ? 's' : ''}`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `Hace ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`;
+}
+
+function updateStreamStats() {
+    const links = JSON.parse(localStorage.getItem('streamLinks') || '[]');
+    const userLinks = links.filter(link => link.sharedBy === getCurrentUserName());
+    
+    const totalLinksElement = document.getElementById('totalSharedLinks');
+    if (totalLinksElement) totalLinksElement.textContent = userLinks.length;
+    
+    const communityHelpedElement = document.getElementById('communityHelped');
+    if (communityHelpedElement) {
+        const totalHelped = userLinks.reduce((sum, link) => sum + (link.upvotes || 0), 0);
+        communityHelpedElement.textContent = totalHelped;
+    }
+}
+
+function loadCommunityComments() {
+    const commentsFeed = document.getElementById('commentsFeed');
+    if (!commentsFeed) return;
+    
+    const comments = JSON.parse(localStorage.getItem('communityComments') || '[]');
+    if (comments.length === 0) return;
+    
+    comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    const commentsHTML = comments.slice(0, 10).map(comment => {
+        const timeAgo = getTimeAgo(comment.timestamp);
+        return `
+            <div class="comment-item">
+                <div class="comment-user">
+                    <div class="user-avatar">${comment.author.charAt(0).toUpperCase()}</div>
+                    <div class="user-info">
+                        <span class="username">${comment.author}</span>
+                        <span class="comment-time">${timeAgo}</span>
+                    </div>
+                </div>
+                <div class="comment-content">${comment.text}</div>
+                <div class="comment-actions">
+                    <button class="comment-action-btn">
+                        <i class="fas fa-thumbs-up"></i> 👍 ${comment.likes || 0}
+                    </button>
+                    <button class="comment-action-btn">
+                        <i class="fas fa-reply"></i> 💬 Responder
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    commentsFeed.innerHTML = commentsHTML;
+}
+
+// Initialize enhanced functionality on load
+setTimeout(() => {
+    setupCommunityComments();
+    updateStreamStats();
+}, 1000);
+
 // Export functions for use in other files
 window.ultraGolApp = {
     teamsData: () => teamsData,
@@ -1871,3 +2206,5 @@ window.ultraGolApp = {
     goToTeam,
     applyAdvancedFilter
 };
+
+console.log('🎯 Enhanced main functionality loaded successfully');

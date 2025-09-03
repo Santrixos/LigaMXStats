@@ -123,117 +123,505 @@
     <!-- Profile Content -->
     <section class="profile-section">
         <div class="container">
-            <div class="profile-grid">
-                <!-- Profile Card -->
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">
-                            <img id="profileAvatarImg" style="display: none;" />
-                            <i class="fas fa-user" id="profileAvatarIcon"></i>
+            <!-- Profile Navigation Tabs -->
+            <div class="profile-navigation">
+                <div class="profile-tabs">
+                    <button class="profile-tab active" onclick="showProfileSection('overview')">👤 Resumen</button>
+                    <button class="profile-tab" onclick="showProfileSection('stats')">📊 Estadísticas</button>
+                    <button class="profile-tab" onclick="showProfileSection('achievements')">🏆 Logros</button>
+                    <button class="profile-tab" onclick="showProfileSection('activity')">⚡ Actividad</button>
+                    <button class="profile-tab" onclick="showProfileSection('preferences')">⚙️ Configuración</button>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview-section" class="profile-content-section active">
+                <div class="profile-hero-card">
+                    <div class="profile-cover-gradient"></div>
+                    <div class="profile-hero-content">
+                        <div class="profile-avatar-container">
+                            <div class="profile-avatar-large">
+                                <img id="profileAvatarImg" style="display: none;" />
+                                <i class="fas fa-user" id="profileAvatarIcon"></i>
+                                <div class="avatar-status-indicator online"></div>
+                            </div>
                             <button class="change-avatar-btn" onclick="changeAvatar()">
                                 <i class="fas fa-camera"></i>
                             </button>
+                            <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
                         </div>
-                        <div class="profile-info">
-                            <h2 id="profileDisplayName">Usuario</h2>
-                            <p id="profileEmail">usuario@email.com</p>
-                            <div class="profile-stats">
-                                <div class="stat">
-                                    <span class="stat-number" id="profileLevel">1</span>
-                                    <span class="stat-label">Nivel</span>
+                        
+                        <div class="profile-hero-info">
+                            <h1 id="profileDisplayName">Usuario</h1>
+                            <p class="profile-title" id="profileTitle">Fan de Liga MX</p>
+                            <p class="profile-email" id="profileEmail">usuario@email.com</p>
+                            
+                            <div class="profile-badges">
+                                <span class="badge level-badge">Nivel <span id="profileLevel">1</span></span>
+                                <span class="badge team-badge" id="teamBadge">🏆 Neutral</span>
+                                <span class="badge status-badge">✨ Activo</span>
+                            </div>
+                            
+                            <div class="profile-quick-stats">
+                                <div class="quick-stat">
+                                    <div class="stat-icon">⭐</div>
+                                    <div class="stat-info">
+                                        <span class="stat-number" id="profilePoints">0</span>
+                                        <span class="stat-label">Puntos</span>
+                                    </div>
                                 </div>
-                                <div class="stat">
-                                    <span class="stat-number" id="profilePoints">0</span>
-                                    <span class="stat-label">Puntos</span>
+                                <div class="quick-stat">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-info">
+                                        <span class="stat-number" id="profileComments">0</span>
+                                        <span class="stat-label">Comentarios</span>
+                                    </div>
                                 </div>
-                                <div class="stat">
-                                    <span class="stat-number" id="profileComments">0</span>
-                                    <span class="stat-label">Comentarios</span>
+                                <div class="quick-stat">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-info">
+                                        <span class="stat-number" id="profilePredictions">0</span>
+                                        <span class="stat-label">Predicciones</span>
+                                    </div>
+                                </div>
+                                <div class="quick-stat">
+                                    <div class="stat-icon">🔗</div>
+                                    <div class="stat-info">
+                                        <span class="stat-number" id="profileLinks">0</span>
+                                        <span class="stat-label">Links</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="profile-details">
-                        <h3>Información Personal</h3>
-                        <form id="profileForm">
-                            <div class="form-group">
-                                <label>Nombre de Usuario</label>
-                                <input type="text" id="editDisplayName" placeholder="Tu nombre de usuario">
-                            </div>
-                            <div class="form-group">
-                                <label>Equipo Favorito</label>
-                                <select id="editFavoriteTeam">
-                                    <option value="">Selecciona tu equipo</option>
-                                    <option value="america">Club América</option>
-                                    <option value="chivas">CD Guadalajara</option>
-                                    <option value="cruz-azul">Cruz Azul</option>
-                                    <option value="pumas">Pumas UNAM</option>
-                                    <option value="tigres">Tigres UANL</option>
-                                    <option value="monterrey">CF Monterrey</option>
-                                    <option value="santos">Santos Laguna</option>
-                                    <option value="leon">Club León</option>
-                                    <option value="toluca">Deportivo Toluca</option>
-                                    <option value="pachuca">CF Pachuca</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Biografía</label>
-                                <textarea id="editBio" placeholder="Cuéntanos sobre ti..." rows="3"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i>
-                                Guardar Cambios
-                            </button>
-                        </form>
                     </div>
                 </div>
 
-                <!-- Preferences Card -->
-                <div class="preferences-card">
-                    <h3>Preferencias</h3>
-                    <div class="preference-item">
-                        <div class="preference-info">
-                            <i class="fas fa-bell"></i>
-                            <div>
-                                <h4>Notificaciones</h4>
-                                <p>Recibe alertas de partidos importantes</p>
+                <div class="profile-overview-grid">
+                    <!-- Profile Info Card -->
+                    <div class="profile-info-card">
+                        <h3><i class="fas fa-edit"></i> Información Personal</h3>
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label>📝 Nombre de Usuario</label>
+                                <input type="text" id="editDisplayName" placeholder="Tu nombre de usuario">
                             </div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="notificationsToggle" checked>
-                            <span class="slider"></span>
-                        </label>
+                            <div class="form-group">
+                                <label>⚽ Equipo Favorito</label>
+                                <select id="editFavoriteTeam">
+                                    <option value="">Selecciona tu equipo</option>
+                                    <option value="america">🦅 Club América</option>
+                                    <option value="chivas">🐐 CD Guadalajara</option>
+                                    <option value="cruz-azul">💙 Cruz Azul</option>
+                                    <option value="pumas">🐆 Pumas UNAM</option>
+                                    <option value="tigres">🐯 Tigres UANL</option>
+                                    <option value="monterrey">⭐ CF Monterrey</option>
+                                    <option value="santos">🌟 Santos Laguna</option>
+                                    <option value="leon">🦁 Club León</option>
+                                    <option value="toluca">🔴 Deportivo Toluca</option>
+                                    <option value="pachuca">⚪ CF Pachuca</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📍 Ciudad</label>
+                                <input type="text" id="editLocation" placeholder="Tu ciudad">
+                            </div>
+                            <div class="form-group">
+                                <label>📝 Biografía</label>
+                                <textarea id="editBio" placeholder="Cuéntanos sobre ti, tu pasión por el fútbol..." rows="4"></textarea>
+                                <small class="char-counter"><span id="bioCharCount">0</span>/200 caracteres</small>
+                            </div>
+                            <div class="form-group">
+                                <label>🎯 Posición Favorita</label>
+                                <select id="editFavoritePosition">
+                                    <option value="">Selecciona posición</option>
+                                    <option value="portero">🥅 Portero</option>
+                                    <option value="defensa">🛡️ Defensa</option>
+                                    <option value="mediocampista">⚽ Mediocampista</option>
+                                    <option value="delantero">⚽ Delantero</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-save">
+                                <i class="fas fa-save"></i>
+                                💾 Guardar Cambios
+                            </button>
+                        </form>
                     </div>
-                    
-                    <div class="preference-item">
-                        <div class="preference-info">
-                            <i class="fas fa-moon"></i>
-                            <div>
-                                <h4>Tema Oscuro</h4>
-                                <p>Cambiar apariencia del sitio</p>
-                            </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="quick-actions-card">
+                        <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                        <div class="quick-actions-grid">
+                            <button class="quick-action-btn" onclick="shareProfile()">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Compartir Perfil</span>
+                            </button>
+                            <button class="quick-action-btn" onclick="openPredictions()">
+                                <i class="fas fa-crystal-ball"></i>
+                                <span>Mis Predicciones</span>
+                            </button>
+                            <button class="quick-action-btn" onclick="openFavorites()">
+                                <i class="fas fa-heart"></i>
+                                <span>Mis Favoritos</span>
+                            </button>
+                            <button class="quick-action-btn" onclick="openStreamLinks()">
+                                <i class="fas fa-link"></i>
+                                <span>Compartir Links</span>
+                            </button>
                         </div>
-                        <label class="switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="slider"></span>
-                        </label>
                     </div>
-                    
-                    <div class="preference-item">
-                        <div class="preference-info">
-                            <i class="fas fa-language"></i>
-                            <div>
-                                <h4>Idioma</h4>
-                                <p>Selecciona tu idioma preferido</p>
+
+                    <!-- Recent Activity Card -->
+                    <div class="recent-activity-card">
+                        <h3><i class="fas fa-clock"></i> Actividad Reciente</h3>
+                        <div class="activity-feed" id="activityFeed">
+                            <div class="activity-item">
+                                <div class="activity-icon">🎉</div>
+                                <div class="activity-content">
+                                    <p><strong>¡Bienvenido a UltraGol!</strong></p>
+                                    <span class="activity-time">Hace poco</span>
+                                </div>
                             </div>
                         </div>
-                        <select id="languageSelect">
-                            <option value="es">Español</option>
-                            <option value="en">English</option>
-                        </select>
                     </div>
                 </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div id="stats-section" class="profile-content-section">
+                <div class="stats-dashboard">
+                    <div class="stats-header">
+                        <h2><i class="fas fa-chart-bar"></i> Mis Estadísticas</h2>
+                        <p>Análisis detallado de tu actividad en UltraGol</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card predictions">
+                            <div class="stat-card-header">
+                                <h3>🎯 Predicciones</h3>
+                                <div class="stat-card-icon">📊</div>
+                            </div>
+                            <div class="stat-card-content">
+                                <div class="big-number" id="totalPredictions">0</div>
+                                <p>Total realizadas</p>
+                                <div class="stat-breakdown">
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">✅ Correctas</span>
+                                        <span class="breakdown-value" id="correctPredictions">0</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">⚡ Precisión</span>
+                                        <span class="breakdown-value" id="predictionAccuracy">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card engagement">
+                            <div class="stat-card-header">
+                                <h3>💬 Participación</h3>
+                                <div class="stat-card-icon">👥</div>
+                            </div>
+                            <div class="stat-card-content">
+                                <div class="big-number" id="totalComments">0</div>
+                                <p>Comentarios realizados</p>
+                                <div class="stat-breakdown">
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">👍 Likes recibidos</span>
+                                        <span class="breakdown-value" id="totalLikes">0</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">💭 Respuestas</span>
+                                        <span class="breakdown-value" id="totalReplies">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card links">
+                            <div class="stat-card-header">
+                                <h3>🔗 Links Compartidos</h3>
+                                <div class="stat-card-icon">📡</div>
+                            </div>
+                            <div class="stat-card-content">
+                                <div class="big-number" id="totalLinksShared">0</div>
+                                <p>Links de transmisión</p>
+                                <div class="stat-breakdown">
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">⭐ Valoración promedio</span>
+                                        <span class="breakdown-value" id="avgLinkRating">5.0</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">👥 Usuarios ayudados</span>
+                                        <span class="breakdown-value" id="usersHelped">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card experience">
+                            <div class="stat-card-header">
+                                <h3>⚡ Experiencia</h3>
+                                <div class="stat-card-icon">🎮</div>
+                            </div>
+                            <div class="stat-card-content">
+                                <div class="big-number" id="currentLevel">1</div>
+                                <p>Nivel actual</p>
+                                <div class="xp-progress">
+                                    <div class="xp-bar">
+                                        <div class="xp-fill" id="xpProgress" style="width: 0%"></div>
+                                    </div>
+                                    <span class="xp-text"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Section -->
+            <div id="achievements-section" class="profile-content-section">
+                <div class="achievements-dashboard">
+                    <div class="achievements-header">
+                        <h2><i class="fas fa-trophy"></i> Mis Logros</h2>
+                        <p>Descubre todos los logros que has desbloqueado</p>
+                    </div>
+                    
+                    <div class="achievements-grid" id="achievementsGrid">
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon">🏆</div>
+                            <h3>Primer Paso</h3>
+                            <p>Completa tu perfil</p>
+                            <div class="achievement-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 20%"></div>
+                                </div>
+                                <span>1/5 completado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon">🎯</div>
+                            <h3>Predictor</h3>
+                            <p>Realiza tu primera predicción</p>
+                            <div class="achievement-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <span>0/1 completado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon">💬</div>
+                            <h3>Conversador</h3>
+                            <p>Escribe tu primer comentario</p>
+                            <div class="achievement-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <span>0/1 completado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon">🔗</div>
+                            <h3>Colaborador</h3>
+                            <p>Comparte tu primer link de transmisión</p>
+                            <div class="achievement-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <span>0/1 completado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Section -->
+            <div id="activity-section" class="profile-content-section">
+                <div class="activity-dashboard">
+                    <div class="activity-header">
+                        <h2><i class="fas fa-clock"></i> Historial de Actividad</h2>
+                        <p>Tu actividad completa en UltraGol</p>
+                    </div>
+                    
+                    <div class="activity-timeline" id="activityTimeline">
+                        <div class="timeline-item">
+                            <div class="timeline-icon welcome">🎉</div>
+                            <div class="timeline-content">
+                                <h4>¡Bienvenido a UltraGol!</h4>
+                                <p>Te has unido a la comunidad más apasionada de Liga MX</p>
+                                <span class="timeline-time">Hace poco</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div id="preferences-section" class="profile-content-section">
+
+                <div class="preferences-dashboard">
+                    <div class="preferences-header">
+                        <h2><i class="fas fa-cog"></i> Configuración</h2>
+                        <p>Personaliza tu experiencia en UltraGol</p>
+                    </div>
+                    
+                    <div class="preferences-grid">
+                        <div class="preference-category">
+                            <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-futbol"></i>
+                                    <div>
+                                        <h4>Partidos en Vivo</h4>
+                                        <p>Notificaciones de goles y eventos importantes</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="liveMatchToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <div>
+                                        <h4>Recordatorios de Partidos</h4>
+                                        <p>Aviso antes de que inicie tu equipo favorito</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="matchRemindersToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-trophy"></i>
+                                    <div>
+                                        <h4>Logros Desbloqueados</h4>
+                                        <p>Notificación cuando logres un nuevo logro</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="achievementsToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-category">
+                            <h3><i class="fas fa-palette"></i> Apariencia</h3>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-moon"></i>
+                                    <div>
+                                        <h4>Tema Oscuro</h4>
+                                        <p>Cambiar apariencia del sitio</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="darkModeToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <div>
+                                        <h4>Colores del Equipo</h4>
+                                        <p>Usar colores de tu equipo favorito en la interfaz</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="teamColorsToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-category">
+                            <h3><i class="fas fa-globe"></i> General</h3>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-language"></i>
+                                    <div>
+                                        <h4>Idioma</h4>
+                                        <p>Selecciona tu idioma preferido</p>
+                                    </div>
+                                </div>
+                                <select id="languageSelect" class="preference-select">
+                                    <option value="es">🇲🇽 Español</option>
+                                    <option value="en">🇺🇸 English</option>
+                                </select>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-eye"></i>
+                                    <div>
+                                        <h4>Perfil Público</h4>
+                                        <p>Permitir que otros usuarios vean tu perfil</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="publicProfileToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-category">
+                            <h3><i class="fas fa-shield-alt"></i> Privacidad</h3>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-envelope"></i>
+                                    <div>
+                                        <h4>Notificaciones por Email</h4>
+                                        <p>Recibir resúmenes semanales por correo</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="emailNotificationsToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <div>
+                                        <h4>Estadísticas Públicas</h4>
+                                        <p>Mostrar tus estadísticas en rankings públicos</p>
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="publicStatsToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preferences-actions">
+                        <button class="btn btn-primary" onclick="savePreferences()">
+                            <i class="fas fa-save"></i>
+                            Guardar Configuración
+                        </button>
+                        <button class="btn btn-outline" onclick="resetPreferences()">
+                            <i class="fas fa-undo"></i>
+                            Restaurar Valores Predeterminados
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
                 <!-- Activity Card -->
                 <div class="activity-card">

@@ -1,6 +1,583 @@
-// Creative User Profiles System for Liga MX UltraGol
-import { db, storage } from './firebase-config.js';
-import { getCurrentUser } from './firebase-config.js';
+// Enhanced Creative User Profiles System for Liga MX UltraGol
+
+// Global variables for profile management
+let currentProfileSection = 'overview';
+let userProfileData = {};
+
+// Initialize enhanced profile system
+function initEnhancedProfile() {
+    setupProfileTabs();
+    setupProfileForm();
+    loadUserProfileData();
+    setupQuickActions();
+}
+
+// Setup profile tab navigation
+function setupProfileTabs() {
+    const profileTabs = document.querySelectorAll('.profile-tab');
+    profileTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const sectionName = this.onclick.toString().match(/showProfileSection\('(\w+)'\)/)[1];
+            showProfileSection(sectionName);
+        });
+    });
+}
+
+// Show specific profile section
+window.showProfileSection = function(sectionName) {
+    // Hide all sections
+    document.querySelectorAll('.profile-content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected section
+    const targetSection = document.getElementById(`${sectionName}-section`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+    
+    // Add active class to clicked tab
+    event.target.classList.add('active');
+    
+    currentProfileSection = sectionName;
+    
+    // Load section-specific data
+    loadSectionData(sectionName);
+};
+
+// Load data for specific section
+function loadSectionData(sectionName) {
+    switch(sectionName) {
+        case 'stats':
+            loadUserStatistics();
+            break;
+        case 'achievements':
+            loadUserAchievements();
+            break;
+        case 'activity':
+            loadUserActivity();
+            break;
+        case 'preferences':
+            loadUserPreferences();
+            break;
+    }
+}
+
+// Setup enhanced profile form
+function setupProfileForm() {
+    const profileForm = document.getElementById('profileForm');
+    const bioTextarea = document.getElementById('editBio');
+    const bioCharCount = document.getElementById('bioCharCount');
+    
+    // Bio character counter
+    if (bioTextarea && bioCharCount) {
+        bioTextarea.addEventListener('input', function() {
+            bioCharCount.textContent = this.value.length;
+            if (this.value.length > 180) {
+                bioCharCount.style.color = '#dc3545';
+            } else {
+                bioCharCount.style.color = '#666';
+            }
+        });
+    }
+    
+    // Form submission
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveEnhancedProfile();
+        });
+    }
+    
+    // Avatar upload
+    const avatarUpload = document.getElementById('avatarUpload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', handleAvatarUpload);
+    }
+}
+
+// Save enhanced profile
+async function saveEnhancedProfile() {
+    try {
+        showLoadingMessage('Guardando perfil...');
+        
+        const formData = {
+            displayName: document.getElementById('editDisplayName')?.value || '',
+            favoriteTeam: document.getElementById('editFavoriteTeam')?.value || '',
+            location: document.getElementById('editLocation')?.value || '',
+            bio: document.getElementById('editBio')?.value || '',
+            favoritePosition: document.getElementById('editFavoritePosition')?.value || '',
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Update profile in Firebase if available
+        if (window.auth && window.auth.currentUser && window.db) {
+            const userRef = window.db.collection('users').doc(window.auth.currentUser.uid);
+            await userRef.update(formData);
+        } else {
+            // Save to localStorage for demo mode
+            localStorage.setItem('userProfile', JSON.stringify(formData));
+        }
+        
+        // Update UI
+        updateProfileDisplay(formData);
+        hideLoadingMessage();
+        showSuccessMessage('¡Perfil actualizado correctamente! 🎉');
+        
+        // Check for achievements
+        checkProfileCompletionAchievement();
+        
+    } catch (error) {
+        hideLoadingMessage();
+        showErrorMessage('Error al guardar el perfil');
+        console.error('Error saving profile:', error);
+    }
+}
+
+// Update profile display
+function updateProfileDisplay(data) {
+    if (data.displayName) {
+        const nameElements = document.querySelectorAll('#profileDisplayName, #userDisplayName');
+        nameElements.forEach(el => el.textContent = data.displayName);
+    }
+    
+    if (data.favoriteTeam) {
+        const teamBadge = document.getElementById('teamBadge');
+        if (teamBadge) {
+            const teamNames = {
+                'america': '🦅 Club América',
+                'chivas': '🐐 CD Guadalajara',
+                'cruz-azul': '💙 Cruz Azul',
+                'pumas': '🐆 Pumas UNAM',
+                'tigres': '🐯 Tigres UANL',
+                'monterrey': '⭐ CF Monterrey'
+            };
+            teamBadge.textContent = teamNames[data.favoriteTeam] || '🏆 ' + data.favoriteTeam;
+        }
+    }
+}
+
+// Load user profile data
+async function loadUserProfileData() {
+    try {
+        let userData = {};
+        
+        // Try to get data from Firebase
+        if (window.auth && window.auth.currentUser && window.db) {
+            const userDoc = await window.db.collection('users').doc(window.auth.currentUser.uid).get();
+            if (userDoc.exists) {
+                userData = userDoc.data();
+            }
+        } else {
+            // Get data from localStorage for demo mode
+            const savedProfile = localStorage.getItem('userProfile');
+            if (savedProfile) {
+                userData = JSON.parse(savedProfile);
+            }
+        }
+        
+        userProfileData = userData;
+        populateProfileForm(userData);
+        updateProfileStats(userData);
+        
+    } catch (error) {
+        console.error('Error loading profile data:', error);
+    }
+}
+
+// Populate profile form with data
+function populateProfileForm(data) {
+    if (data.displayName) {
+        const nameInput = document.getElementById('editDisplayName');
+        if (nameInput) nameInput.value = data.displayName;
+    }
+    
+    if (data.favoriteTeam) {
+        const teamSelect = document.getElementById('editFavoriteTeam');
+        if (teamSelect) teamSelect.value = data.favoriteTeam;
+    }
+    
+    if (data.location) {
+        const locationInput = document.getElementById('editLocation');
+        if (locationInput) locationInput.value = data.location;
+    }
+    
+    if (data.bio) {
+        const bioTextarea = document.getElementById('editBio');
+        const bioCharCount = document.getElementById('bioCharCount');
+        if (bioTextarea) {
+            bioTextarea.value = data.bio;
+            if (bioCharCount) bioCharCount.textContent = data.bio.length;
+        }
+    }
+    
+    if (data.favoritePosition) {
+        const positionSelect = document.getElementById('editFavoritePosition');
+        if (positionSelect) positionSelect.value = data.favoritePosition;
+    }
+}
+
+// Update profile statistics
+function updateProfileStats(data) {
+    const level = data.level || 1;
+    const points = data.points || 0;
+    const comments = data.stats?.commentsCount || 0;
+    const predictions = data.stats?.predictionsTotal || 0;
+    const links = data.stats?.linksShared || 0;
+    
+    // Update quick stats
+    const levelElements = document.querySelectorAll('#profileLevel, #userLevel, #currentLevel');
+    levelElements.forEach(el => el.textContent = level);
+    
+    const pointsElements = document.querySelectorAll('#profilePoints, #userPoints');
+    pointsElements.forEach(el => el.textContent = points);
+    
+    const commentsElements = document.querySelectorAll('#profileComments, #totalComments');
+    commentsElements.forEach(el => el.textContent = comments);
+    
+    const predictionsElements = document.querySelectorAll('#profilePredictions, #totalPredictions');
+    predictionsElements.forEach(el => el.textContent = predictions);
+    
+    const linksElements = document.querySelectorAll('#profileLinks, #totalLinksShared');
+    linksElements.forEach(el => el.textContent = links);
+    
+    // Update XP progress
+    const currentXP = data.experience || 0;
+    const nextLevelXP = level * 100;
+    const xpProgress = ((currentXP % 100) / 100) * 100;
+    
+    const xpProgressBar = document.getElementById('xpProgress');
+    if (xpProgressBar) {
+        xpProgressBar.style.width = xpProgress + '%';
+    }
+    
+    const currentXPElement = document.getElementById('currentXP');
+    if (currentXPElement) currentXPElement.textContent = currentXP % 100;
+    
+    const nextLevelXPElement = document.getElementById('nextLevelXP');
+    if (nextLevelXPElement) nextLevelXPElement.textContent = 100;
+    
+    // Calculate and update accuracy
+    const correctPredictions = data.stats?.predictionsCorrect || 0;
+    const accuracy = predictions > 0 ? Math.round((correctPredictions / predictions) * 100) : 0;
+    
+    const accuracyElement = document.getElementById('predictionAccuracy');
+    if (accuracyElement) accuracyElement.textContent = accuracy + '%';
+    
+    const correctPredictionsElement = document.getElementById('correctPredictions');
+    if (correctPredictionsElement) correctPredictionsElement.textContent = correctPredictions;
+}
+
+// Setup quick actions
+function setupQuickActions() {
+    // Add event listeners for quick action buttons
+    window.shareProfile = function() {
+        const profileUrl = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Mi Perfil en UltraGol',
+                text: '¡Mira mi perfil en UltraGol!',
+                url: profileUrl
+            });
+        } else {
+            // Fallback to copy to clipboard
+            navigator.clipboard.writeText(profileUrl).then(() => {
+                showSuccessMessage('¡Enlace copiado al portapapeles!');
+            });
+        }
+    };
+    
+    window.openPredictions = function() {
+        window.location.href = 'fixtures.html#predictions';
+    };
+    
+    window.openFavorites = function() {
+        showProfileSection('activity');
+    };
+    
+    window.openStreamLinks = function() {
+        showLinkSharingModal();
+    };
+}
+
+// Show link sharing modal
+function showLinkSharingModal() {
+    // Create and show the stream links modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'streamLinksModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-link"></i> Compartir Links de Transmisión</h2>
+                <button class="close-modal" onclick="closeModal('streamLinksModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="stream-links-form">
+                    <div class="form-group">
+                        <label>🏆 Partido</label>
+                        <input type="text" id="matchName" placeholder="Ej: América vs Chivas">
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 URL de Transmisión</label>
+                        <input type="url" id="streamUrl" placeholder="https://ejemplo.com/stream">
+                    </div>
+                    <div class="form-group">
+                        <label>⭐ Calidad (1-5 estrellas)</label>
+                        <select id="streamQuality">
+                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                            <option value="4">⭐⭐⭐⭐ Muy buena</option>
+                            <option value="3">⭐⭐⭐ Buena</option>
+                            <option value="2">⭐⭐ Regular</option>
+                            <option value="1">⭐ Mala</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>💬 Comentarios (opcional)</label>
+                        <textarea id="streamComments" placeholder="Información adicional sobre este stream..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitStreamLink()">
+                        <i class="fas fa-share"></i> Compartir Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+}
+
+// Submit stream link
+window.submitStreamLink = async function() {
+    const matchName = document.getElementById('matchName').value;
+    const streamUrl = document.getElementById('streamUrl').value;
+    const quality = document.getElementById('streamQuality').value;
+    const comments = document.getElementById('streamComments').value;
+    
+    if (!matchName || !streamUrl) {
+        showErrorMessage('Por favor completa al menos el partido y la URL');
+        return;
+    }
+    
+    try {
+        showLoadingMessage('Compartiendo link...');
+        
+        const linkData = {
+            matchName,
+            streamUrl,
+            quality: parseInt(quality),
+            comments,
+            sharedBy: userProfileData.displayName || 'Usuario Anónimo',
+            sharedAt: new Date().toISOString(),
+            upvotes: 0,
+            downvotes: 0
+        };
+        
+        // Save to Firebase or localStorage
+        if (window.auth && window.auth.currentUser && window.db) {
+            await window.db.collection('streamLinks').add(linkData);
+            
+            // Update user stats
+            const userRef = window.db.collection('users').doc(window.auth.currentUser.uid);
+            await userRef.update({
+                'stats.linksShared': window.firebase.firestore.FieldValue.increment(1),
+                points: window.firebase.firestore.FieldValue.increment(10)
+            });
+        } else {
+            // Save to localStorage for demo
+            const savedLinks = JSON.parse(localStorage.getItem('streamLinks') || '[]');
+            savedLinks.push(linkData);
+            localStorage.setItem('streamLinks', JSON.stringify(savedLinks));
+        }
+        
+        hideLoadingMessage();
+        showSuccessMessage('¡Link compartido exitosamente! +10 puntos 🎉');
+        closeModal('streamLinksModal');
+        
+        // Refresh stats
+        loadUserProfileData();
+        
+    } catch (error) {
+        hideLoadingMessage();
+        showErrorMessage('Error al compartir el link');
+        console.error('Error sharing link:', error);
+    }
+};
+
+// Check profile completion achievement
+function checkProfileCompletionAchievement() {
+    const nameInput = document.getElementById('editDisplayName');
+    const teamSelect = document.getElementById('editFavoriteTeam');
+    const locationInput = document.getElementById('editLocation');
+    const bioTextarea = document.getElementById('editBio');
+    
+    const isComplete = nameInput?.value && 
+                      teamSelect?.value && 
+                      locationInput?.value && 
+                      bioTextarea?.value;
+    
+    if (isComplete) {
+        // Update achievement progress
+        const achievementCard = document.querySelector('.achievement-card');
+        if (achievementCard) {
+            achievementCard.classList.remove('locked');
+            achievementCard.classList.add('unlocked');
+            const progressBar = achievementCard.querySelector('.progress-fill');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            const progressText = achievementCard.querySelector('.achievement-progress span');
+            if (progressText) {
+                progressText.textContent = '5/5 completado';
+            }
+        }
+        
+        setTimeout(() => {
+            showSuccessMessage('¡Logro desbloqueado: Primer Paso! 🏆 +25 puntos');
+        }, 1000);
+    }
+}
+
+// Load user statistics
+function loadUserStatistics() {
+    // Implementation for loading detailed statistics
+    console.log('Loading user statistics...');
+}
+
+// Load user achievements
+function loadUserAchievements() {
+    // Implementation for loading achievements
+    console.log('Loading user achievements...');
+}
+
+// Load user activity
+function loadUserActivity() {
+    // Implementation for loading activity timeline
+    console.log('Loading user activity...');
+}
+
+// Load user preferences
+function loadUserPreferences() {
+    // Implementation for loading preferences
+    console.log('Loading user preferences...');
+}
+
+// Utility functions
+function showLoadingMessage(message) {
+    console.log('Loading:', message);
+    // Add visual loading indicator here
+}
+
+function hideLoadingMessage() {
+    console.log('Loading complete');
+    // Hide visual loading indicator here
+}
+
+function showSuccessMessage(message) {
+    console.log('Success:', message);
+    // Add success notification here
+    alert(message);
+}
+
+function showErrorMessage(message) {
+    console.log('Error:', message);
+    // Add error notification here
+    alert(message);
+}
+
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.remove();
+    }
+};
+
+// Handle avatar upload
+async function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        showLoadingMessage('Subiendo avatar...');
+        
+        // Create a preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const avatarImg = document.getElementById('profileAvatarImg');
+            const avatarIcon = document.getElementById('profileAvatarIcon');
+            if (avatarImg && avatarIcon) {
+                avatarImg.src = e.target.result;
+                avatarImg.style.display = 'block';
+                avatarIcon.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(file);
+        
+        hideLoadingMessage();
+        showSuccessMessage('Avatar actualizado correctamente');
+        
+    } catch (error) {
+        hideLoadingMessage();
+        console.error('Error uploading avatar:', error);
+        showErrorMessage('Error al subir el avatar');
+    }
+}
+
+// Save preferences
+window.savePreferences = function() {
+    const preferences = {
+        liveMatchToggle: document.getElementById('liveMatchToggle')?.checked || false,
+        matchRemindersToggle: document.getElementById('matchRemindersToggle')?.checked || false,
+        achievementsToggle: document.getElementById('achievementsToggle')?.checked || false,
+        darkModeToggle: document.getElementById('darkModeToggle')?.checked || false,
+        teamColorsToggle: document.getElementById('teamColorsToggle')?.checked || false,
+        languageSelect: document.getElementById('languageSelect')?.value || 'es',
+        publicProfileToggle: document.getElementById('publicProfileToggle')?.checked || false,
+        emailNotificationsToggle: document.getElementById('emailNotificationsToggle')?.checked || false,
+        publicStatsToggle: document.getElementById('publicStatsToggle')?.checked || false
+    };
+    
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
+    showSuccessMessage('¡Configuración guardada correctamente! ⚙️');
+};
+
+// Reset preferences
+window.resetPreferences = function() {
+    if (confirm('¿Estás seguro de que quieres restaurar los valores predeterminados?')) {
+        localStorage.removeItem('userPreferences');
+        
+        // Reset all toggles to default
+        document.getElementById('liveMatchToggle').checked = true;
+        document.getElementById('matchRemindersToggle').checked = true;
+        document.getElementById('achievementsToggle').checked = true;
+        document.getElementById('darkModeToggle').checked = false;
+        document.getElementById('teamColorsToggle').checked = false;
+        document.getElementById('languageSelect').value = 'es';
+        document.getElementById('publicProfileToggle').checked = true;
+        document.getElementById('emailNotificationsToggle').checked = false;
+        document.getElementById('publicStatsToggle').checked = true;
+        
+        showSuccessMessage('Configuración restaurada a valores predeterminados');
+    }
+};
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize if we're on the profile page
+    if (window.location.pathname.includes('user-profile.html')) {
+        initEnhancedProfile();
+    }
+});
+
+// Creative User Profiles System for Liga MX UltraGol (Original code preserved for compatibility)
 import { 
     doc, 
     getDoc, 

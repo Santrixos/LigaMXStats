@@ -210,21 +210,45 @@ async function loadUserProfile() {
     }
 }
 
-// UI Functions
+// Enhanced UI Functions
 function showUserInterface() {
     const authButtons = document.getElementById('authButtons');
     const userMenu = document.getElementById('userMenu');
     
-    if (authButtons) authButtons.style.display = 'none';
-    if (userMenu) userMenu.style.display = 'flex';
+    // Hide auth buttons and show user menu
+    if (authButtons) {
+        authButtons.style.display = 'none';
+        authButtons.style.visibility = 'hidden';
+    }
+    if (userMenu) {
+        userMenu.style.display = 'flex';
+        userMenu.style.visibility = 'visible';
+    }
+    
+    // Enable authenticated features
+    enableAuthenticatedFeatures();
+    
+    console.log('✅ User interface updated - authenticated mode');
 }
 
 function showAuthInterface() {
     const authButtons = document.getElementById('authButtons');
     const userMenu = document.getElementById('userMenu');
     
-    if (authButtons) authButtons.style.display = 'flex';
-    if (userMenu) userMenu.style.display = 'none';
+    // Show auth buttons and hide user menu
+    if (authButtons) {
+        authButtons.style.display = 'flex';
+        authButtons.style.visibility = 'visible';
+    }
+    if (userMenu) {
+        userMenu.style.display = 'none';
+        userMenu.style.visibility = 'hidden';
+    }
+    
+    // Disable authenticated features
+    disableAuthenticatedFeatures();
+    
+    console.log('❌ User interface updated - unauthenticated mode');
 }
 
 function updateNavbarAuth() {
@@ -236,6 +260,10 @@ function updateNavbarAuth() {
             link.style.opacity = '1';
             link.style.pointerEvents = 'auto';
         });
+        enableAuthenticatedFeatures();
+    } else {
+        // User is logged out - show limited features
+        disableAuthenticatedFeatures();
     }
 }
 
@@ -313,7 +341,209 @@ function closeModal(modalId) {
     }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initAuth);
+// Enable authenticated features
+function enableAuthenticatedFeatures() {
+    // Enable comments sections
+    const commentSections = document.querySelectorAll('.comments-section, .comment-form');
+    commentSections.forEach(section => {
+        section.style.display = 'block';
+        section.classList.remove('auth-required');
+    });
+    
+    // Enable stream links sharing
+    const linkShareSections = document.querySelectorAll('.link-sharing-section, .share-link-btn');
+    linkShareSections.forEach(section => {
+        section.style.display = 'block';
+        section.classList.remove('auth-required');
+    });
+    
+    // Remove auth required messages
+    const authMessages = document.querySelectorAll('.auth-required-message');
+    authMessages.forEach(message => {
+        message.style.display = 'none';
+    });
+    
+    // Show authenticated content
+    const authContent = document.querySelectorAll('.auth-only-content');
+    authContent.forEach(content => {
+        content.style.display = 'block';
+        content.classList.add('visible');
+    });
+    
+    // Enable profile-related features
+    const profileButtons = document.querySelectorAll('.profile-required');
+    profileButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+    });
+    
+    console.log('✅ Authenticated features enabled');
+}
 
-console.log('✅ Real authentication system loaded');
+// Disable authenticated features
+function disableAuthenticatedFeatures() {
+    // Hide comments sections and show auth required message
+    const commentSections = document.querySelectorAll('.comments-section, .comment-form');
+    commentSections.forEach(section => {
+        section.style.display = 'none';
+        section.classList.add('auth-required');
+    });
+    
+    // Hide stream links sharing
+    const linkShareSections = document.querySelectorAll('.link-sharing-section, .share-link-btn');
+    linkShareSections.forEach(section => {
+        section.style.display = 'none';
+        section.classList.add('auth-required');
+    });
+    
+    // Show auth required messages
+    const authMessages = document.querySelectorAll('.auth-required-message');
+    authMessages.forEach(message => {
+        message.style.display = 'block';
+    });
+    
+    // Hide authenticated content
+    const authContent = document.querySelectorAll('.auth-only-content');
+    authContent.forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('visible');
+    });
+    
+    // Disable profile-related features
+    const profileButtons = document.querySelectorAll('.profile-required');
+    profileButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+    });
+    
+    console.log('❌ Authenticated features disabled');
+}
+
+// Global functions for modal management
+window.openAuthModal = function(mode) {
+    const modal = document.getElementById('authModal');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const modalTitle = document.getElementById('authModalTitle');
+    
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        if (mode === 'register') {
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            modalTitle.textContent = 'Crear Cuenta';
+        } else {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            modalTitle.textContent = 'Iniciar Sesión';
+        }
+    }
+};
+
+window.closeAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+window.showAuthTab = function(tab) {
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const modalTitle = document.getElementById('authModalTitle');
+    
+    if (tab === 'register') {
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        modalTitle.textContent = 'Crear Cuenta';
+    } else {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        modalTitle.textContent = 'Iniciar Sesión';
+    }
+};
+
+// Profile management functions
+window.toggleProfileDropdown = function() {
+    const dropdown = document.getElementById('profileDropdown');
+    const icon = document.getElementById('dropdownIcon');
+    
+    if (dropdown) {
+        const isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+        
+        if (icon) {
+            icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    }
+};
+
+window.openUserProfile = function() {
+    window.location.href = 'user-profile.html';
+};
+
+window.openUserPreferences = function() {
+    window.location.href = 'user-profile.html#preferences';
+};
+
+window.openUserFavorites = function() {
+    window.location.href = 'user-profile.html#activity';
+};
+
+window.openUserStats = function() {
+    window.location.href = 'user-profile.html#stats';
+};
+
+window.logoutUser = async function() {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        await signOutUser();
+    }
+};
+
+// Form handlers
+function setupAuthForms() {
+    // Login form
+    const loginForm = document.getElementById('loginFormElement');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            await loginUser(email, password);
+        });
+    }
+    
+    // Register form
+    const registerForm = document.getElementById('registerFormElement');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
+            await registerUser(email, password, name, favoriteTeam);
+        });
+    }
+}
+
+// Initialize auth forms when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initAuth();
+    setupAuthForms();
+});
+
+console.log('✅ Enhanced authentication system loaded');

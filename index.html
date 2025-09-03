@@ -241,6 +241,66 @@
         </div>
     </section>
 
+    <!-- Stream Links Sharing Section (Prominent) -->
+    <section class="stream-sharing-hero">
+        <div class="container">
+            <div class="stream-sharing-card">
+                <div class="stream-sharing-header">
+                    <h2><i class="fas fa-link"></i> 🔗 Comparte Links de Transmisión</h2>
+                    <p>Ayuda a la comunidad compartiendo links de transmisiones en vivo</p>
+                </div>
+                
+                <!-- Authenticated Content -->
+                <div class="auth-only-content" style="display: none;">
+                    <div class="stream-sharing-actions">
+                        <button class="btn btn-primary btn-large share-link-btn" onclick="openQuickShareModal()">
+                            <i class="fas fa-plus-circle"></i>
+                            ➕ Compartir Link Nuevo
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewSharedLinks()">
+                            <i class="fas fa-list"></i>
+                            📋 Ver Links Compartidos
+                        </button>
+                    </div>
+                    
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="totalSharedLinks">0</span>
+                            <span class="stat-label">Links Compartidos</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="communityHelped">0</span>
+                            <span class="stat-label">Usuarios Ayudados</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="avgRating">5.0</span>
+                            <span class="stat-label">Calificación Promedio</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Authentication Required Message -->
+                <div class="auth-required-message" style="display: block;">
+                    <div class="auth-message-content">
+                        <i class="fas fa-lock fa-2x"></i>
+                        <h3>🔒 Inicia Sesión para Compartir</h3>
+                        <p>Únete a la comunidad de UltraGol para compartir links de transmisión y ayudar a otros fanáticos a ver los partidos</p>
+                        <div class="auth-message-actions">
+                            <button class="btn btn-primary" onclick="openAuthModal('login')">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Iniciar Sesión
+                            </button>
+                            <button class="btn btn-outline" onclick="openAuthModal('register')">
+                                <i class="fas fa-user-plus"></i>
+                                Registrarse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Recent Matches -->
     <section class="recent-matches">
         <div class="container">
@@ -359,6 +419,78 @@
                                 <span class="importance">★★★★☆</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Comments Section -->
+    <section class="community-comments">
+        <div class="container">
+            <h2 class="section-title">💬 Comentarios de la Comunidad</h2>
+            
+            <!-- Authenticated Comments -->
+            <div class="auth-only-content comments-section" style="display: none;">
+                <div class="comment-form-container">
+                    <h3>🗨️ Comparte tu opinión</h3>
+                    <form class="comment-form" id="communityCommentForm">
+                        <div class="form-group">
+                            <textarea id="commentText" placeholder="¿Qué piensas sobre Liga MX? Comparte tu opinión, análisis o predicciones..." rows="3" maxlength="500"></textarea>
+                            <small class="char-counter"><span id="commentCharCount">0</span>/500 caracteres</small>
+                        </div>
+                        <div class="comment-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                💬 Publicar Comentario
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="clearCommentForm()">
+                                <i class="fas fa-times"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="comments-feed" id="commentsFeed">
+                    <div class="comment-item sample-comment">
+                        <div class="comment-user">
+                            <div class="user-avatar">👤</div>
+                            <div class="user-info">
+                                <span class="username">Usuario Ejemplo</span>
+                                <span class="comment-time">Hace 5 minutos</span>
+                            </div>
+                        </div>
+                        <div class="comment-content">
+                            ¡Excelente temporada de Liga MX! Mi equipo favorito está jugando increíble. 🏆⚽
+                        </div>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn">
+                                <i class="fas fa-thumbs-up"></i> 👍 5
+                            </button>
+                            <button class="comment-action-btn">
+                                <i class="fas fa-reply"></i> 💬 Responder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Authentication Required Message for Comments -->
+            <div class="auth-required-message" style="display: block;">
+                <div class="auth-message-content">
+                    <i class="fas fa-comments fa-2x"></i>
+                    <h3>💬 Únete a la Conversación</h3>
+                    <p>Inicia sesión para comentar y participar en la comunidad de fanáticos de Liga MX</p>
+                    <div class="auth-message-actions">
+                        <button class="btn btn-primary" onclick="openAuthModal('login')">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Iniciar Sesión
+                        </button>
+                        <button class="btn btn-outline" onclick="openAuthModal('register')">
+                            <i class="fas fa-user-plus"></i>
+                            Registrarse
+                        </button>
                     </div>
                 </div>
             </div>
