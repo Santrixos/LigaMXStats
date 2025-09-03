@@ -16,6 +16,7 @@ function initializeApp() {
     setupCounterAnimations();
     setupThemeSystem();
     setupAdvancedFeatures();
+    setupAuthIntegration();
     // Initialize user interface after DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupUserInterface);
@@ -1353,6 +1354,497 @@ function updateFilterButtons(type, value) {
     filterButtons.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === value);
     });
+}
+
+// Authentication Integration System
+function setupAuthIntegration() {
+    // Wait for Firebase to be available
+    const waitForFirebase = () => {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            initializeAuthSystem();
+        } else {
+            setTimeout(waitForFirebase, 500);
+        }
+    };
+    waitForFirebase();
+}
+
+function initializeAuthSystem() {
+    // Listen for authentication state changes
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in
+            console.log('✅ Usuario autenticado:', user.displayName || user.email);
+            showUserInterface(user);
+            enableAuthenticatedFeatures(user);
+            loadUserProfile(user);
+        } else {
+            // User is signed out
+            console.log('❌ Usuario no autenticado');
+            showAuthInterface();
+            disableAuthenticatedFeatures();
+        }
+    });
+    
+    setupAuthModals();
+}
+
+// Show user interface when logged in
+function showUserInterface(user) {
+    const authButtons = document.getElementById('authButtons');
+    const userMenu = document.getElementById('userMenu');
+    const userDisplayName = document.getElementById('userDisplayName');
+    
+    if (authButtons) authButtons.style.display = 'none';
+    if (userMenu) userMenu.style.display = 'flex';
+    if (userDisplayName) userDisplayName.textContent = user.displayName || 'Usuario';
+    
+    updateUserStats(user);
+}
+
+// Show auth interface when logged out
+function showAuthInterface() {
+    const authButtons = document.getElementById('authButtons');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (authButtons) authButtons.style.display = 'flex';
+    if (userMenu) userMenu.style.display = 'none';
+}
+
+// Enable features that require authentication
+function enableAuthenticatedFeatures(user) {
+    // Enable comments
+    enableCommentsSystem(user);
+    
+    // Enable match links sharing
+    enableMatchLinksSystem(user);
+    
+    // Enable notifications
+    enableNotificationSystem(user);
+    
+    // Show authenticated content
+    showAuthenticatedContent();
+}
+
+// Disable features when not authenticated
+function disableAuthenticatedFeatures() {
+    // Disable comments
+    disableCommentsSystem();
+    
+    // Disable match links sharing
+    disableMatchLinksSystem();
+    
+    // Disable notifications
+    disableNotificationSystem();
+    
+    // Show login prompts
+    showLoginPrompts();
+}
+
+// Enable comments system
+function enableCommentsSystem(user) {
+    // Update existing comments section
+    const commentsSection = document.querySelector('.comments-section');
+    if (commentsSection) {
+        const commentForm = `
+            <div class="comment-form-active" style="background: white; border-radius: 10px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ff9933, #ffaa44); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <strong>${user.displayName || 'Usuario'}</strong>
+                        <div style="font-size: 12px; color: #666;">Conectado y listo para comentar</div>
+                    </div>
+                </div>
+                <form id="quickCommentForm">
+                    <textarea id="quickCommentText" placeholder="¿Qué opinas sobre este partido? Comparte tu análisis..." 
+                              style="width: 100%; padding: 15px; border: 2px solid #e9ecef; border-radius: 8px; resize: vertical; min-height: 100px; font-family: inherit;" 
+                              maxlength="500"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="addEmoji('⚽')" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 6px; cursor: pointer;">⚽</button>
+                            <button type="button" onclick="addEmoji('🔥')" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 6px; cursor: pointer;">🔥</button>
+                            <button type="button" onclick="addEmoji('👏')" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 6px; cursor: pointer;">👏</button>
+                            <button type="button" onclick="addEmoji('⭐')" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 6px; cursor: pointer;">⭐</button>
+                        </div>
+                        <button type="submit" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-paper-plane"></i> Comentar (+5 puntos)
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                <h3 style="margin-bottom: 20px; color: #333;">Comentarios Recientes</h3>
+                <div id="commentsList">
+                    <p style="text-align: center; color: #666; padding: 40px;">Los comentarios aparecerán aquí...</p>
+                </div>
+            </div>
+        `;
+        
+        const container = commentsSection.querySelector('.container > div');
+        if (container) {
+            container.innerHTML = commentForm;
+        }
+        
+        setupCommentForm(user);
+    }
+}
+
+// Disable comments system
+function disableCommentsSystem() {
+    const commentsSection = document.querySelector('.comments-section');
+    if (commentsSection) {
+        const container = commentsSection.querySelector('.container > div');
+        if (container) {
+            container.innerHTML = `
+                <p style="text-align: center; color: #666; margin: 20px 0;">
+                    <i class="fas fa-lock" style="font-size: 24px; color: #ccc; display: block; margin-bottom: 10px;"></i>
+                    Inicia sesión para comentar y participar en la comunidad
+                </p>
+                <div style="text-align: center;">
+                    <button onclick="openAuthModal('login')" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button onclick="openAuthModal('register')" style="background: #2c5aa0; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Enable match links system
+function enableMatchLinksSystem(user) {
+    const linksSection = document.querySelector('[style*="background: linear-gradient(135deg, #1a1a1a"]');
+    if (linksSection) {
+        const container = linksSection.querySelector('.container > div');
+        if (container) {
+            container.innerHTML = `
+                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ff9933, #ffaa44); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <strong style="color: white;">${user.displayName || 'Usuario'}</strong>
+                            <div style="font-size: 12px; color: #ccc;">¡Ya puedes compartir links!</div>
+                        </div>
+                    </div>
+                    <form id="linkSharingForm" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; color: #ccc; margin-bottom: 5px; font-size: 14px;">URL del Stream</label>
+                            <input type="url" id="streamUrl" placeholder="https://..." 
+                                   style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(255,255,255,0.1); color: white;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; color: #ccc; margin-bottom: 5px; font-size: 14px;">Calidad</label>
+                            <select id="streamQuality" style="padding: 12px; border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(255,255,255,0.1); color: white;">
+                                <option value="HD">HD</option>
+                                <option value="SD">SD</option>
+                                <option value="4K">4K</option>
+                            </select>
+                        </div>
+                        <button type="submit" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-share-alt"></i> Compartir (+10 puntos)
+                        </button>
+                    </form>
+                </div>
+                <div style="margin-top: 30px;">
+                    <h3 style="color: white; margin-bottom: 20px;">Links Recientes</h3>
+                    <div id="linksList">
+                        <p style="text-align: center; color: #ccc; padding: 20px;">Los links compartidos aparecerán aquí...</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        setupLinkSharingForm(user);
+    }
+}
+
+// Disable match links system
+function disableMatchLinksSystem() {
+    const linksSection = document.querySelector('[style*="background: linear-gradient(135deg, #1a1a1a"]');
+    if (linksSection) {
+        const container = linksSection.querySelector('.container > div');
+        if (container) {
+            container.innerHTML = `
+                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; text-align: center;">
+                    <p style="margin: 20px 0; color: #ccc;">
+                        <i class="fas fa-tv" style="font-size: 24px; color: #ff9933; display: block; margin-bottom: 10px;"></i>
+                        Comparte y descubre enlaces de transmisión de partidos
+                    </p>
+                    <button onclick="openAuthModal('register')" style="background: linear-gradient(45deg, #ff9933, #ffaa44); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-share-alt"></i> Compartir Link
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Enable notification system
+function enableNotificationSystem(user) {
+    // Add notification bell to user menu
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu && !document.getElementById('notificationBell')) {
+        const notificationBell = document.createElement('div');
+        notificationBell.id = 'notificationBell';
+        notificationBell.innerHTML = `
+            <button style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; position: relative; margin-right: 15px;" title="Notificaciones">
+                <i class="fas fa-bell"></i>
+                <span id="notificationCount" style="position: absolute; top: -8px; right: -8px; background: #ff4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 12px; display: none; align-items: center; justify-content: center;">0</span>
+            </button>
+        `;
+        userMenu.insertBefore(notificationBell, userMenu.firstChild);
+    }
+}
+
+// Disable notification system
+function disableNotificationSystem() {
+    const notificationBell = document.getElementById('notificationBell');
+    if (notificationBell) {
+        notificationBell.remove();
+    }
+}
+
+// Load user profile data
+async function loadUserProfile(user) {
+    if (window.db && user) {
+        try {
+            const userDoc = await window.db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                
+                // Update UI with user data
+                const userLevel = document.getElementById('userLevel');
+                const userPoints = document.getElementById('userPoints');
+                
+                if (userLevel) userLevel.textContent = userData.level || 1;
+                if (userPoints) userPoints.textContent = userData.points || 0;
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+    }
+}
+
+// Update user stats in UI
+function updateUserStats(user) {
+    // This will be called when user data is loaded
+}
+
+// Setup comment form functionality
+function setupCommentForm(user) {
+    const form = document.getElementById('quickCommentForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const textarea = document.getElementById('quickCommentText');
+            const comment = textarea.value.trim();
+            
+            if (comment) {
+                showSuccessMessage('¡Comentario publicado! +5 puntos');
+                textarea.value = '';
+                
+                // Add comment to display
+                const commentsList = document.getElementById('commentsList');
+                if (commentsList) {
+                    const commentHTML = `
+                        <div style="border-bottom: 1px solid #eee; padding: 15px 0; display: flex; gap: 15px;">
+                            <div style="width: 32px; height: 32px; background: linear-gradient(45deg, #ff9933, #ffaa44); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${user.displayName || 'Usuario'}</div>
+                                <p style="color: #666; margin: 0; line-height: 1.5;">${comment}</p>
+                                <div style="color: #999; font-size: 12px; margin-top: 8px;">Hace un momento</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (commentsList.innerHTML.includes('Los comentarios aparecerán aquí')) {
+                        commentsList.innerHTML = commentHTML;
+                    } else {
+                        commentsList.insertAdjacentHTML('afterbegin', commentHTML);
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Setup link sharing form functionality
+function setupLinkSharingForm(user) {
+    const form = document.getElementById('linkSharingForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlInput = document.getElementById('streamUrl');
+            const qualitySelect = document.getElementById('streamQuality');
+            
+            const url = urlInput.value.trim();
+            const quality = qualitySelect.value;
+            
+            if (url) {
+                showSuccessMessage('¡Link compartido exitosamente! +10 puntos');
+                urlInput.value = '';
+                
+                // Add link to display
+                const linksList = document.getElementById('linksList');
+                if (linksList) {
+                    const linkHTML = `
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 24px; height: 24px; background: linear-gradient(45deg, #ff9933, #ffaa44); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span style="color: white; font-weight: 600;">${user.displayName || 'Usuario'}</span>
+                                    <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${quality}</span>
+                                </div>
+                                <span style="color: #ccc; font-size: 12px;">Hace un momento</span>
+                            </div>
+                            <a href="${url}" target="_blank" style="color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(45deg, #ff9933, #ffaa44); padding: 8px 16px; border-radius: 6px; font-size: 14px;">
+                                <i class="fas fa-play"></i> Ver Stream
+                            </a>
+                        </div>
+                    `;
+                    
+                    if (linksList.innerHTML.includes('Los links compartidos aparecerán aquí')) {
+                        linksList.innerHTML = linkHTML;
+                    } else {
+                        linksList.insertAdjacentHTML('afterbegin', linkHTML);
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Setup authentication modals
+function setupAuthModals() {
+    // Login form handler
+    const loginForm = document.getElementById('loginFormElement');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (window.signInWithEmail) {
+                const result = await window.signInWithEmail(email, password);
+                if (result.success) {
+                    showSuccessMessage('¡Bienvenido de vuelta!');
+                    closeModal('authModal');
+                }
+            }
+        });
+    }
+    
+    // Register form handler
+    const registerForm = document.getElementById('registerFormElement');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const favoriteTeam = document.getElementById('registerFavoriteTeam').value;
+            
+            if (window.signUpWithEmail) {
+                const result = await window.signUpWithEmail(email, password, name, favoriteTeam);
+                if (result.success) {
+                    showSuccessMessage('¡Cuenta creada exitosamente!');
+                    closeModal('authModal');
+                }
+            }
+        });
+    }
+}
+
+// Helper functions
+function showAuthenticatedContent() {
+    // Show content that's only available to authenticated users
+}
+
+function showLoginPrompts() {
+    // Show prompts to login for protected features
+}
+
+// Utility function to add emoji to comment
+window.addEmoji = function(emoji) {
+    const textarea = document.getElementById('quickCommentText');
+    if (textarea) {
+        textarea.value += emoji;
+        textarea.focus();
+    }
+};
+
+// Profile menu functions
+window.toggleProfileDropdown = function() {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) {
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+};
+
+window.openUserProfile = function() {
+    window.location.href = 'user-profile.html';
+};
+
+window.logoutUser = async function() {
+    if (window.signOutUser) {
+        await window.signOutUser();
+        showSuccessMessage('Sesión cerrada correctamente');
+    }
+};
+
+// Modal functions
+window.openAuthModal = function(type) {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        showAuthTab(type);
+    }
+};
+
+window.closeAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+window.showAuthTab = function(tab) {
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const modalTitle = document.getElementById('authModalTitle');
+    
+    if (tab === 'login') {
+        loginTab?.classList.add('active');
+        registerTab?.classList.remove('active');
+        if (loginForm) loginForm.style.display = 'block';
+        if (registerForm) registerForm.style.display = 'none';
+        if (modalTitle) modalTitle.textContent = 'Iniciar Sesión';
+    } else {
+        registerTab?.classList.add('active');
+        loginTab?.classList.remove('active');
+        if (registerForm) registerForm.style.display = 'block';
+        if (loginForm) loginForm.style.display = 'none';
+        if (modalTitle) modalTitle.textContent = 'Registrarse';
+    }
+};
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Export functions for use in other files
