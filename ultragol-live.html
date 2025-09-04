@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>UltraGol LIVE - Transmisiones en Vivo</title>
+    <link rel="stylesheet" href="css/main.css?v=2024091801">
+    <link rel="stylesheet" href="css/animations.css?v=2024091801">
+    <link rel="stylesheet" href="css/firebase-features.css?v=2024091801">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <style>
+        /* Live Page Specific Styles */
+        .live-page {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+
+        .live-header {
+            text-align: center;
+            padding: 4rem 0;
+            background: 
+                radial-gradient(ellipse at top, rgba(255, 51, 51, 0.3) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(255, 51, 51, 0.15), rgba(255, 153, 51, 0.1));
+            border-bottom: 3px solid rgba(255, 51, 51, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .live-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255, 51, 51, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 153, 51, 0.1) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+            pointer-events: none;
+        }
+
+        .live-logo {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            text-shadow: 
+                0 0 30px rgba(255, 51, 51, 0.8),
+                0 0 60px rgba(255, 51, 51, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .live-logo::before {
+            content: '🔴';
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 51, 51, 0.8));
+        }
+
+        .live-subtitle {
+            font-size: 1.8rem;
+            color: #ff9933;
+            font-weight: 400;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 20px rgba(255, 153, 51, 0.5);
+        }
+
+        .content-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            padding: 4rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-card {
+            background: 
+                linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+                radial-gradient(circle at top left, rgba(255, 51, 51, 0.1), transparent 50%);
+            border-radius: 25px;
+            padding: 2.5rem;
+            border: 2px solid transparent;
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            background: linear-gradient(45deg, 
+                rgba(255, 51, 51, 0.5), 
+                rgba(255, 153, 51, 0.3), 
+                rgba(255, 51, 51, 0.5));
+            border-radius: inherit;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        .section-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 
+                0 30px 60px rgba(255, 51, 51, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 153, 51, 0.3);
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff3333, #ff9933);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Enhanced Stream Links Display */
+        .stream-item {
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(255, 153, 51, 0.2);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .stream-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 51, 51, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .stream-item:hover::before {
+            left: 100%;
+        }
+
+        .stream-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 40px rgba(255, 51, 51, 0.3),
+                0 0 0 1px rgba(255, 51, 51, 0.5);
+            border-color: rgba(255, 51, 51, 0.7);
+        }
+
+        .stream-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .match-info {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .platform-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .youtube { background: #ff0000; color: #fff; }
+        .facebook { background: #1877f2; color: #fff; }
+        .instagram { background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d); color: #fff; }
+        .otros { background: #666; color: #fff; }
+
+        .stream-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #ff3333, #ff6633);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .stream-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+        }
+
+        /* Upload Form */
+        .upload-form {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 2px dashed rgba(255, 153, 51, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #ff9933;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 153, 51, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #ff9933;
+            box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: #aaa;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #ff3333, #ff9933);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 51, 51, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { 
+                opacity: 0.3;
+                filter: hue-rotate(0deg);
+            }
+            50% { 
+                opacity: 1;
+                filter: hue-rotate(90deg);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .no-streams {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-sections {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 2rem 1rem;
+            }
+            
+            .live-logo {
+                font-size: 2.5rem;
+                flex-direction: column;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="live-page">
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.svg" alt="UltraGol" class="logo">
+                <span class="logo-text">UltraGol</span>
+                <span class="company-tag">by L3HO</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="standings.html" class="nav-link">Tabla de Posiciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="teams.html" class="nav-link">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="fixtures.html" class="nav-link">Partidos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendario.html" class="nav-link">Calendario</a>
+                </li>
+                <li class="nav-item">
+                    <a href="estadisticas.html" class="nav-link">Estadísticas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ultragol-live.html" class="nav-link live-link active">
+                        <i class="fas fa-play-circle"></i> UltraGol LIVE
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Live Header -->
+    <section class="live-header">
+        <div class="container">
+            <h1 class="live-logo">UltraGol LIVE</h1>
+            <p class="live-subtitle">Transmisiones de Fútbol en Vivo</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-sections">
+            <!-- Links de Partidos Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <h2 class="section-title">Links de Partidos</h2>
+                </div>
+                
+                <div id="streamsList">
+                    <div class="no-streams">
+                        <i class="fas fa-tv fa-2x" style="color: #666; margin-bottom: 1rem;"></i>
+                        <p>Cargando transmisiones disponibles...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subir Links Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h2 class="section-title">Compartir Transmisión</h2>
+                </div>
+                
+                <form class="upload-form" id="streamUploadForm">
+                    <div class="form-group">
+                        <label class="form-label">Nombre del Partido</label>
+                        <input type="text" class="form-input" id="matchName" placeholder="Ej: América vs Chivas" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Link de Transmisión</label>
+                        <input type="url" class="form-input" id="streamUrl" placeholder="https://..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Plataforma</label>
+                        <select class="form-select" id="platform" required>
+                            <option value="">Selecciona la plataforma</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Descripción (Opcional)</label>
+                        <input type="text" class="form-input" id="description" placeholder="Calidad, idioma, etc.">
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="loading-spinner" id="loadingSpinner"></span>
+                        <i class="fas fa-upload"></i>
+                        Compartir Transmisión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>UltraGol LIVE</h3>
+                    <p>Transmisiones de fútbol en vivo by L3HO</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="standings.html">Tabla de Posiciones</a></li>
+                        <li><a href="teams.html">Equipos</a></li>
+                        <li><a href="fixtures.html">Partidos</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 UltraGol by L3HO. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js?v=2024091801"></script>
+    <script src="js/ultragol-live.js"></script>
+</body>
+</html>

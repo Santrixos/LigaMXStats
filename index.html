@@ -47,61 +47,12 @@
                 <li class="nav-item">
                     <a href="estadisticas.html" class="nav-link">Estadísticas</a>
                 </li>
+                <li class="nav-item">
+                    <a href="ultragol-live.html" class="nav-link live-link">
+                        <i class="fas fa-play-circle"></i> UltraGol LIVE
+                    </a>
+                </li>
             </ul>
-            <!-- Auth Buttons -->
-            <div class="auth-buttons" id="authButtons">
-                <button class="btn btn-outline" onclick="openAuthModal('login')">
-                    <i class="fas fa-sign-in-alt"></i> Inicia Sesión
-                </button>
-                <button class="btn btn-primary" onclick="openAuthModal('register')">
-                    <i class="fas fa-user-plus"></i> Registrarse
-                </button>
-            </div>
-            
-            <!-- User Menu (Hidden by default) -->
-            <div class="user-menu" id="userMenu" style="display: none;">
-                <div class="user-profile-summary" onclick="toggleProfileDropdown()">
-                    <div class="user-avatar" id="userAvatar">
-                        <img id="userAvatarImg" style="display: none; width: 40px; height: 40px; border-radius: 50%;" />
-                        <i class="fas fa-user" id="userAvatarIcon"></i>
-                    </div>
-                    <div class="user-info">
-                        <span class="user-name" id="userDisplayName">Usuario</span>
-                        <div class="user-stats-mini">
-                            <span class="level">Nv. <span id="userLevel">1</span></span>
-                            <span class="points"><i class="fas fa-star"></i> <span id="userPoints">0</span></span>
-                        </div>
-                    </div>
-                    <button class="profile-dropdown-btn">
-                        <i class="fas fa-chevron-down" id="dropdownIcon"></i>
-                    </button>
-                </div>
-                
-                <!-- Dropdown Menu -->
-                <div class="profile-dropdown" id="profileDropdown" style="display: none;">
-                    <div class="dropdown-item" onclick="openUserProfile()">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Mi Perfil</span>
-                    </div>
-                    <div class="dropdown-item" onclick="openUserPreferences()">
-                        <i class="fas fa-cog"></i>
-                        <span>Configuración</span>
-                    </div>
-                    <div class="dropdown-item" onclick="openUserFavorites()">
-                        <i class="fas fa-heart"></i>
-                        <span>Mis Favoritos</span>
-                    </div>
-                    <div class="dropdown-item" onclick="openUserStats()">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Mis Estadísticas</span>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-item" onclick="logoutUser()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Cerrar Sesión</span>
-                    </div>
-                </div>
-            </div>
             
             <div class="hamburger">
                 <span class="bar"></span>
@@ -241,61 +192,59 @@
         </div>
     </section>
 
-    <!-- Stream Links Sharing Section (Prominent) -->
-    <section class="stream-sharing-hero">
+    <!-- Live Streams Section -->
+    <section class="live-streams-hero">
         <div class="container">
-            <div class="stream-sharing-card">
-                <div class="stream-sharing-header">
-                    <h2><i class="fas fa-link"></i> 🔗 Comparte Links de Transmisión</h2>
-                    <p>Ayuda a la comunidad compartiendo links de transmisiones en vivo</p>
+            <div class="live-streams-card">
+                <div class="live-streams-header">
+                    <h2 class="live-title">
+                        <span class="live-icon">
+                            <i class="fas fa-play-circle"></i>
+                            <span class="pulse"></span>
+                        </span>
+                        🔴 TRANSMISIONES EN VIVO
+                    </h2>
+                    <p class="live-subtitle">Disfruta los partidos de Liga MX en tiempo real</p>
                 </div>
                 
-                <!-- Authenticated Content -->
-                <div class="auth-only-content" style="display: none;">
-                    <div class="stream-sharing-actions">
-                        <button class="btn btn-primary btn-large share-link-btn" onclick="openQuickShareModal()">
-                            <i class="fas fa-plus-circle"></i>
-                            ➕ Compartir Link Nuevo
-                        </button>
-                        <button class="btn btn-secondary" onclick="viewSharedLinks()">
-                            <i class="fas fa-list"></i>
-                            📋 Ver Links Compartidos
-                        </button>
+                <div class="live-streams-content">
+                    <div class="live-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Enlaces de Calidad</h3>
+                            <p>Links verificados de transmisiones en vivo</p>
+                        </div>
                     </div>
                     
-                    <div class="quick-stats">
-                        <div class="stat-item">
-                            <span class="stat-number" id="totalSharedLinks">0</span>
-                            <span class="stat-label">Links Compartidos</span>
+                    <div class="live-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="communityHelped">0</span>
-                            <span class="stat-label">Usuarios Ayudados</span>
+                        <div class="feature-text">
+                            <h3>Comunidad Activa</h3>
+                            <p>Comparte y encuentra los mejores streams</p>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="avgRating">5.0</span>
-                            <span class="stat-label">Calificación Promedio</span>
+                    </div>
+                    
+                    <div class="live-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Multiplataforma</h3>
+                            <p>YouTube, Facebook, Instagram y más</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Authentication Required Message -->
-                <div class="auth-required-message" style="display: block;">
-                    <div class="auth-message-content">
-                        <i class="fas fa-lock fa-2x"></i>
-                        <h3>🔒 Inicia Sesión para Compartir</h3>
-                        <p>Únete a la comunidad de UltraGol para compartir links de transmisión y ayudar a otros fanáticos a ver los partidos</p>
-                        <div class="auth-message-actions">
-                            <button class="btn btn-primary" onclick="openAuthModal('login')">
-                                <i class="fas fa-sign-in-alt"></i>
-                                Iniciar Sesión
-                            </button>
-                            <button class="btn btn-outline" onclick="openAuthModal('register')">
-                                <i class="fas fa-user-plus"></i>
-                                Registrarse
-                            </button>
-                        </div>
-                    </div>
+                <div class="live-cta">
+                    <a href="ultragol-live.html" class="btn btn-live">
+                        <i class="fas fa-play"></i>
+                        <span>ACCEDER A UltraGol LIVE</span>
+                        <div class="btn-glow"></div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -425,77 +374,6 @@
         </div>
     </section>
 
-    <!-- Community Comments Section -->
-    <section class="community-comments">
-        <div class="container">
-            <h2 class="section-title">💬 Comentarios de la Comunidad</h2>
-            
-            <!-- Authenticated Comments -->
-            <div class="auth-only-content comments-section" style="display: none;">
-                <div class="comment-form-container">
-                    <h3>🗨️ Comparte tu opinión</h3>
-                    <form class="comment-form" id="communityCommentForm">
-                        <div class="form-group">
-                            <textarea id="commentText" placeholder="¿Qué piensas sobre Liga MX? Comparte tu opinión, análisis o predicciones..." rows="3" maxlength="500"></textarea>
-                            <small class="char-counter"><span id="commentCharCount">0</span>/500 caracteres</small>
-                        </div>
-                        <div class="comment-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i>
-                                💬 Publicar Comentario
-                            </button>
-                            <button type="button" class="btn btn-outline" onclick="clearCommentForm()">
-                                <i class="fas fa-times"></i>
-                                Limpiar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div class="comments-feed" id="commentsFeed">
-                    <div class="comment-item sample-comment">
-                        <div class="comment-user">
-                            <div class="user-avatar">👤</div>
-                            <div class="user-info">
-                                <span class="username">Usuario Ejemplo</span>
-                                <span class="comment-time">Hace 5 minutos</span>
-                            </div>
-                        </div>
-                        <div class="comment-content">
-                            ¡Excelente temporada de Liga MX! Mi equipo favorito está jugando increíble. 🏆⚽
-                        </div>
-                        <div class="comment-actions">
-                            <button class="comment-action-btn">
-                                <i class="fas fa-thumbs-up"></i> 👍 5
-                            </button>
-                            <button class="comment-action-btn">
-                                <i class="fas fa-reply"></i> 💬 Responder
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Authentication Required Message for Comments -->
-            <div class="auth-required-message" style="display: block;">
-                <div class="auth-message-content">
-                    <i class="fas fa-comments fa-2x"></i>
-                    <h3>💬 Únete a la Conversación</h3>
-                    <p>Inicia sesión para comentar y participar en la comunidad de fanáticos de Liga MX</p>
-                    <div class="auth-message-actions">
-                        <button class="btn btn-primary" onclick="openAuthModal('login')">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Iniciar Sesión
-                        </button>
-                        <button class="btn btn-outline" onclick="openAuthModal('register')">
-                            <i class="fas fa-user-plus"></i>
-                            Registrarse
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Professional Insights -->
     <section class="professional-insights">
@@ -569,106 +447,6 @@
         </div>
     </footer>
 
-    <!-- Authentication Modal -->
-    <div class="modal" id="authModal" style="display: none;">
-        <div class="modal-content auth-modal-content">
-            <div class="modal-header">
-                <h2 id="authModalTitle">Iniciar Sesión</h2>
-                <button class="close-modal" onclick="closeAuthModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="showAuthTab('login')" id="loginTab">Iniciar Sesión</button>
-                    <button class="auth-tab" onclick="showAuthTab('register')" id="registerTab">Registrarse</button>
-                </div>
-                
-                <!-- Login Form -->
-                <div class="auth-form" id="loginForm">
-                    <form id="loginFormElement">
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="loginEmail" required placeholder="tu@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" id="loginPassword" required placeholder="Tu contraseña">
-                        </div>
-                        <button type="submit" class="btn btn-primary full-width">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Iniciar Sesión
-                        </button>
-                    </form>
-                    
-                    <div class="auth-divider">
-                        <span>o</span>
-                    </div>
-                    
-                    <button class="btn btn-google full-width" onclick="signInWithGoogle()">
-                        <i class="fab fa-google"></i>
-                        Continuar con Google
-                    </button>
-                    
-                    <div class="auth-links">
-                        <a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
-                    </div>
-                </div>
-                
-                <!-- Register Form -->
-                <div class="auth-form" id="registerForm" style="display: none;">
-                    <form id="registerFormElement">
-                        <div class="form-group">
-                            <label>Nombre de Usuario</label>
-                            <input type="text" id="registerName" required placeholder="Tu nombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="registerEmail" required placeholder="tu@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" id="registerPassword" required placeholder="Mínimo 6 caracteres">
-                        </div>
-                        <div class="form-group">
-                            <label>Equipo Favorito</label>
-                            <select id="registerFavoriteTeam">
-                                <option value="">Selecciona tu equipo</option>
-                                <option value="america">Club América</option>
-                                <option value="chivas">CD Guadalajara</option>
-                                <option value="cruz-azul">Cruz Azul</option>
-                                <option value="pumas">Pumas UNAM</option>
-                                <option value="tigres">Tigres UANL</option>
-                                <option value="monterrey">CF Monterrey</option>
-                                <option value="santos">Santos Laguna</option>
-                                <option value="leon">Club León</option>
-                            </select>
-                        </div>
-                        <div class="form-group checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="acceptTerms" required>
-                                <span class="checkbox-custom"></span>
-                                Acepto los <a href="#">términos y condiciones</a>
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary full-width">
-                            <i class="fas fa-user-plus"></i>
-                            Crear Cuenta
-                        </button>
-                    </form>
-                    
-                    <div class="auth-divider">
-                        <span>o</span>
-                    </div>
-                    
-                    <button class="btn btn-google full-width" onclick="signInWithGoogle()">
-                        <i class="fab fa-google"></i>
-                        Registrarse con Google
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <!-- Global API Key Script -->
     <script>

@@ -38,35 +38,12 @@
                 <li class="nav-item">
                     <a href="estadisticas.html" class="nav-link">Estadísticas</a>
                 </li>
+                <li class="nav-item">
+                    <a href="ultragol-live.html" class="nav-link live-link">
+                        <i class="fas fa-play-circle"></i> UltraGol LIVE
+                    </a>
+                </li>
             </ul>
-            <!-- Auth Buttons -->
-            <div class="auth-buttons" id="authButtons">
-                <button class="btn btn-outline" onclick="openAuthModal('login')">
-                    <i class="fas fa-sign-in-alt"></i> Inicia Sesión
-                </button>
-                <button class="btn btn-primary" onclick="openAuthModal('register')">
-                    <i class="fas fa-user-plus"></i> Registrarse
-                </button>
-            </div>
-            
-            <!-- User Menu (Hidden by default) -->
-            <div class="user-menu" id="userMenu" style="display: none;">
-                <div class="user-profile-summary">
-                    <div class="user-avatar" id="userAvatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="user-info">
-                        <span class="user-name" id="userDisplayName">Usuario</span>
-                        <div class="user-stats-mini">
-                            <span class="level">Nv. <span id="userLevel">1</span></span>
-                            <span class="points"><i class="fas fa-star"></i> <span id="userPoints">0</span></span>
-                        </div>
-                    </div>
-                    <button class="profile-dropdown-btn" onclick="toggleProfileDropdown()">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-            </div>
             
             <div class="hamburger">
                 <span class="bar"></span>
@@ -84,57 +61,95 @@
         </div>
     </section>
 
-    <!-- Standings Table -->
+    <!-- Modern Standings Section -->
     <section class="standings-section">
         <div class="container">
-            <div class="table-controls">
-                <div class="table-info">
-                    <span class="last-update">Última actualización: <span id="lastUpdate"></span></span>
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="panel-left">
+                    <div class="update-info">
+                        <i class="fas fa-clock"></i>
+                        <span class="last-update">Actualizado: <span id="lastUpdate">Hace 2 horas</span></span>
+                    </div>
                 </div>
-                <div class="table-filters">
-                    <button class="filter-btn active" data-filter="general">General</button>
-                    <button class="filter-btn" data-filter="home">Local</button>
-                    <button class="filter-btn" data-filter="away">Visitante</button>
-                </div>
-            </div>
-
-            <div class="standings-container">
-                <div class="table-wrapper">
-                    <table class="standings-table" id="standingsTable">
-                        <thead>
-                            <tr>
-                                <th class="position-header">Pos</th>
-                                <th class="team-header">Equipo</th>
-                                <th class="games-header">PJ</th>
-                                <th class="wins-header">G</th>
-                                <th class="draws-header">E</th>
-                                <th class="losses-header">P</th>
-                                <th class="goals-header">GF</th>
-                                <th class="goals-header">GC</th>
-                                <th class="diff-header">DIF</th>
-                                <th class="points-header">PTS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="standingsBody">
-                            <!-- Dynamic content loaded via JavaScript -->
-                        </tbody>
-                    </table>
+                <div class="panel-right">
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="cards" id="cardsView">
+                            <i class="fas fa-th-large"></i> Tarjetas
+                        </button>
+                        <button class="toggle-btn" data-view="table" id="tableView">
+                            <i class="fas fa-table"></i> Tabla
+                        </button>
+                    </div>
+                    <div class="filter-options">
+                        <select class="filter-select" id="seasonFilter">
+                            <option value="general">General</option>
+                            <option value="home">Estadio Local</option>
+                            <option value="away">Como Visitante</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- Legend -->
-            <div class="standings-legend">
-                <div class="legend-item">
-                    <span class="legend-color liguilla"></span>
-                    <span class="legend-text">Clasificación a Liguilla</span>
+            <!-- Cards View (Default) -->
+            <div class="standings-cards" id="standingsCards">
+                <div class="cards-grid" id="cardsGrid">
+                    <!-- Dynamic cards content -->
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando posiciones...</p>
+                    </div>
                 </div>
-                <div class="legend-item">
-                    <span class="legend-color play-in"></span>
-                    <span class="legend-text">Play-In</span>
+            </div>
+
+            <!-- Traditional Table View -->
+            <div class="standings-table-view" id="standingsTableView" style="display: none;">
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table class="modern-table" id="standingsTable">
+                            <thead>
+                                <tr>
+                                    <th class="pos-col">#</th>
+                                    <th class="team-col">Equipo</th>
+                                    <th class="stat-col">PJ</th>
+                                    <th class="stat-col">G</th>
+                                    <th class="stat-col">E</th>
+                                    <th class="stat-col">P</th>
+                                    <th class="stat-col">GF</th>
+                                    <th class="stat-col">GC</th>
+                                    <th class="stat-col">DIF</th>
+                                    <th class="pts-col">PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="standingsBody">
+                                <!-- Dynamic table content -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="legend-item">
-                    <span class="legend-color descenso"></span>
-                    <span class="legend-text">Zona de Descenso</span>
+            </div>
+
+            <!-- Enhanced Legend -->
+            <div class="modern-legend">
+                <div class="legend-title">
+                    <i class="fas fa-info-circle"></i>
+                    Clasificación de Posiciones
+                </div>
+                <div class="legend-items">
+                    <div class="legend-group">
+                        <div class="legend-item">
+                            <div class="legend-indicator liguilla"></div>
+                            <span>Clasificación Directa (1-6)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-indicator play-in"></div>
+                            <span>Play-In (7-10)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-indicator eliminado"></div>
+                            <span>Eliminados (11-18)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,6 +212,6 @@
     </footer>
 
     <script src="js/main.js"></script>
-    <script src="js/standings.js"></script>
+    <script src="js/modern-standings.js"></script>
 </body>
 </html>
