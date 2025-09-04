@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Perfil de Usuario - UltraGol by L3HO</title>
+    <link rel="stylesheet" href="css/main.css?v=2024091801">
+    <link rel="stylesheet" href="css/fanzone.css?v=2024091801">
+    <link rel="stylesheet" href="css/profile.css?v=2024091801">
+    <link rel="stylesheet" href="css/animations.css?v=2024091801">
+    <link rel="stylesheet" href="css/firebase-features.css?v=2024091801">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.svg" alt="Liga MX" class="logo">
+                <span class="logo-text">UltraGol</span>
+                <span class="company-tag">by L3HO</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="standings.html" class="nav-link">Tabla de Posiciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="teams.html" class="nav-link">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="fanzone.html" class="nav-link">Fan Zone</a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendario.html" class="nav-link">Calendario</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ultragol-live.html" class="nav-link">UltraGol LIVE</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header Section -->
+    <section class="profile-header">
+        <div class="profile-cover">
+            <div class="cover-image" id="coverImage">
+                <div class="cover-overlay"></div>
+                <button class="edit-cover-btn" id="editCover" title="Cambiar portada">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="profile-info">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <img id="avatarImage" src="" alt="Avatar" style="display: none;">
+                        <div class="avatar-placeholder" id="avatarPlaceholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="avatar-status" id="userStatus">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <button class="edit-avatar-btn" id="editAvatar" title="Cambiar foto">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="verification-badge" id="verificationBadge" style="display: none;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                
+                <div class="profile-details">
+                    <div class="profile-main-info">
+                        <h1 class="profile-name" id="profileName">Cargando...</h1>
+                        <p class="profile-username" id="profileUsername">@usuario</p>
+                        <p class="profile-bio" id="profileBio">Esta es mi biografía personal donde comparto mi pasión por el fútbol mexicano.</p>
+                        
+                        <div class="profile-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Se unió en <span id="joinDate">enero 2024</span></span>
+                            </div>
+                            <div class="meta-item" id="locationMeta" style="display: none;">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span id="userLocation">México</span>
+                            </div>
+                            <div class="meta-item" id="teamMeta" style="display: none;">
+                                <i class="fas fa-heart"></i>
+                                <span>Fan de <span id="favoriteTeam">América</span></span>
+                            </div>
+                            <div class="meta-item" id="websiteMeta" style="display: none;">
+                                <i class="fas fa-link"></i>
+                                <a href="#" id="userWebsite" target="_blank">sitio web</a>
+                            </div>
+                        </div>
+                        
+                        <div class="social-links" id="socialLinks">
+                            <!-- Social media links will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="action-btn primary-btn" id="primaryAction">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Seguir</span>
+                        </button>
+                        <button class="action-btn secondary-btn" id="messageBtn">
+                            <i class="fas fa-envelope"></i>
+                            <span>Mensaje</span>
+                        </button>
+                        <button class="action-btn secondary-btn" id="moreBtn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Stats -->
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="postsCount">0</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="followersCount">0</div>
+                    <div class="stat-label">Seguidores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="followingCount">0</div>
+                    <div class="stat-label">Siguiendo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="likesCount">0</div>
+                    <div class="stat-label">Likes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="commentsCount">0</div>
+                    <div class="stat-label">Comentarios</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Navigation -->
+    <section class="profile-navigation">
+        <div class="container">
+            <div class="profile-nav-tabs">
+                <button class="nav-tab active" data-tab="posts">
+                    <i class="fas fa-th"></i>
+                    <span>Posts</span>
+                </button>
+                <button class="nav-tab" data-tab="videos">
+                    <i class="fas fa-play"></i>
+                    <span>Videos</span>
+                </button>
+                <button class="nav-tab" data-tab="photos">
+                    <i class="fas fa-image"></i>
+                    <span>Fotos</span>
+                </button>
+                <button class="nav-tab" data-tab="likes">
+                    <i class="fas fa-heart"></i>
+                    <span>Me Gusta</span>
+                </button>
+                <button class="nav-tab" data-tab="achievements">
+                    <i class="fas fa-trophy"></i>
+                    <span>Logros</span>
+                </button>
+                <button class="nav-tab" data-tab="activity">
+                    <i class="fas fa-clock"></i>
+                    <span>Actividad</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Content -->
+    <section class="profile-content">
+        <div class="container">
+            <div class="profile-layout">
+                <!-- Left Sidebar -->
+                <div class="profile-sidebar">
+                    <!-- Achievements Card -->
+                    <div class="sidebar-card achievements-card">
+                        <h3>
+                            <i class="fas fa-trophy"></i>
+                            Logros
+                        </h3>
+                        <div class="achievements-grid" id="achievementsGrid">
+                            <!-- Achievements will be loaded here -->
+                        </div>
+                        <button class="view-all-btn" id="viewAllAchievements">
+                            Ver todos los logros
+                        </button>
+                    </div>
+                    
+                    <!-- Favorite Team Card -->
+                    <div class="sidebar-card team-card" id="teamCard">
+                        <h3>
+                            <i class="fas fa-heart"></i>
+                            Equipo Favorito
+                        </h3>
+                        <div class="team-info" id="teamInfo">
+                            <!-- Team info will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Summary -->
+                    <div class="sidebar-card activity-summary">
+                        <h3>
+                            <i class="fas fa-chart-line"></i>
+                            Resumen de Actividad
+                        </h3>
+                        <div class="activity-stats">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-calendar-week"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <span class="activity-number" id="weeklyPosts">0</span>
+                                    <span class="activity-label">Posts esta semana</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <span class="activity-number" id="streakDays">0</span>
+                                    <span class="activity-label">Días de racha</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <span class="activity-number" id="totalScore">0</span>
+                                    <span class="activity-label">Puntuación total</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Followers Preview -->
+                    <div class="sidebar-card followers-preview">
+                        <h3>
+                            <i class="fas fa-users"></i>
+                            Seguidores
+                        </h3>
+                        <div class="followers-list" id="followersPreview">
+                            <!-- Followers preview will be loaded here -->
+                        </div>
+                        <button class="view-all-btn" id="viewAllFollowers">
+                            Ver todos los seguidores
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Main Content Area -->
+                <div class="profile-main-content">
+                    <!-- Posts Tab -->
+                    <div class="tab-content active" id="postsTab">
+                        <div class="content-header">
+                            <h3>Posts de Usuario</h3>
+                            <div class="content-filters">
+                                <select id="postsSort">
+                                    <option value="recent">Más recientes</option>
+                                    <option value="popular">Más populares</option>
+                                    <option value="oldest">Más antiguos</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="posts-grid" id="userPostsGrid">
+                            <!-- User posts will be loaded here -->
+                        </div>
+                        
+                        <div class="load-more-container">
+                            <button class="load-more-btn" id="loadMoreUserPosts">
+                                <i class="fas fa-plus"></i>
+                                <span>Cargar más posts</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Videos Tab -->
+                    <div class="tab-content" id="videosTab">
+                        <div class="content-header">
+                            <h3>Videos</h3>
+                        </div>
+                        <div class="videos-grid" id="userVideosGrid">
+                            <!-- User videos will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Photos Tab -->
+                    <div class="tab-content" id="photosTab">
+                        <div class="content-header">
+                            <h3>Fotos</h3>
+                        </div>
+                        <div class="photos-grid" id="userPhotosGrid">
+                            <!-- User photos will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Likes Tab -->
+                    <div class="tab-content" id="likesTab">
+                        <div class="content-header">
+                            <h3>Posts que le gustan</h3>
+                        </div>
+                        <div class="liked-posts-grid" id="likedPostsGrid">
+                            <!-- Liked posts will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements Tab -->
+                    <div class="tab-content" id="achievementsTab">
+                        <div class="content-header">
+                            <h3>Todos los Logros</h3>
+                        </div>
+                        <div class="achievements-full-grid" id="achievementsFullGrid">
+                            <!-- All achievements will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Tab -->
+                    <div class="tab-content" id="activityTab">
+                        <div class="content-header">
+                            <h3>Actividad Reciente</h3>
+                        </div>
+                        <div class="activity-timeline" id="activityTimeline">
+                            <!-- Activity timeline will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="modal-close" id="closeEditModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" class="edit-profile-form">
+                    <div class="form-section">
+                        <h4>Información Básica</h4>
+                        <div class="form-group">
+                            <label for="editDisplayName">Nombre a mostrar</label>
+                            <input type="text" id="editDisplayName" maxlength="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editUsername">Nombre de usuario</label>
+                            <input type="text" id="editUsername" maxlength="30" required>
+                            <small>Solo letras, números y guiones bajos</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editBio">Biografía</label>
+                            <textarea id="editBio" maxlength="160" rows="3"></textarea>
+                            <div class="char-counter">
+                                <span id="bioCharCount">0</span>/160
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>Ubicación y Preferencias</h4>
+                        <div class="form-group">
+                            <label for="editLocation">Ubicación</label>
+                            <input type="text" id="editLocation" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="editFavoriteTeam">Equipo Favorito</label>
+                            <select id="editFavoriteTeam">
+                                <option value="">Seleccionar equipo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editWebsite">Sitio Web</label>
+                            <input type="url" id="editWebsite" placeholder="https://ejemplo.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>Redes Sociales</h4>
+                        <div class="form-group">
+                            <label for="editTwitter">Twitter</label>
+                            <div class="input-with-icon">
+                                <i class="fab fa-twitter"></i>
+                                <input type="text" id="editTwitter" placeholder="@usuario">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editInstagram">Instagram</label>
+                            <div class="input-with-icon">
+                                <i class="fab fa-instagram"></i>
+                                <input type="text" id="editInstagram" placeholder="@usuario">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTikTok">TikTok</label>
+                            <div class="input-with-icon">
+                                <i class="fab fa-tiktok"></i>
+                                <input type="text" id="editTikTok" placeholder="@usuario">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>Configuración de Privacidad</h4>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="profilePrivate">
+                                <span class="checkmark"></span>
+                                Perfil privado
+                            </label>
+                            <small>Solo tus seguidores pueden ver tu contenido</small>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showOnlineStatus">
+                                <span class="checkmark"></span>
+                                Mostrar estado en línea
+                            </label>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allowMessages">
+                                <span class="checkmark"></span>
+                                Permitir mensajes de cualquier usuario
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn secondary-btn" id="cancelEdit">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn primary-btn">
+                            <i class="fas fa-save"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Followers Modal -->
+    <div class="modal" id="followersModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="followersModalTitle">Seguidores</h3>
+                <button class="modal-close" id="closeFollowersModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="followers-search">
+                    <input type="text" id="followersSearch" placeholder="Buscar usuarios...">
+                </div>
+                <div class="followers-list-modal" id="followersListModal">
+                    <!-- Followers list will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div class="modal" id="messageModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Enviar Mensaje</h3>
+                <button class="modal-close" id="closeMessageModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="message-form">
+                    <textarea id="messageText" placeholder="Escribe tu mensaje..." rows="4" maxlength="500"></textarea>
+                    <div class="char-counter">
+                        <span id="messageCharCount">0</span>/500
+                    </div>
+                    <div class="message-actions">
+                        <button class="btn secondary-btn" id="cancelMessage">
+                            Cancelar
+                        </button>
+                        <button class="btn primary-btn" id="sendMessage">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file inputs -->
+    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+    <input type="file" id="coverUpload" accept="image/*" style="display: none;">
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js?v=2024091801"></script>
+    <script src="js/profile.js?v=2024091801"></script>
+</body>
+</html>

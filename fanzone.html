@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Fan Zone - UltraGol by L3HO</title>
+    <link rel="stylesheet" href="css/main.css?v=2024091801">
+    <link rel="stylesheet" href="css/fanzone.css?v=2024091801">
+    <link rel="stylesheet" href="css/animations.css?v=2024091801">
+    <link rel="stylesheet" href="css/firebase-features.css?v=2024091801">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.svg" alt="Liga MX" class="logo">
+                <span class="logo-text">UltraGol</span>
+                <span class="company-tag">by L3HO</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="standings.html" class="nav-link">Tabla de Posiciones</a>
+                </li>
+                <li class="nav-item">
+                    <a href="teams.html" class="nav-link">Equipos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="fanzone.html" class="nav-link active">Fan Zone</a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendario.html" class="nav-link">Calendario</a>
+                </li>
+                <li class="nav-item">
+                    <a href="ultragol-live.html" class="nav-link">UltraGol LIVE</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Fan Zone Hero Section -->
+    <section class="fanzone-hero">
+        <div class="hero-background">
+            <div class="gradient-overlay"></div>
+            <div class="floating-icons">
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-camera"></i>
+                <i class="fas fa-play"></i>
+                <i class="fas fa-comment"></i>
+                <i class="fas fa-share"></i>
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-gradient">Fan Zone</span>
+                    <span class="title-emoji">⚽🔥</span>
+                </h1>
+                <p class="hero-subtitle">Comparte tu pasión por la Liga MX</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="1250">0</span>
+                        <span class="stat-label">Posts</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="847">0</span>
+                        <span class="stat-label">Videos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="3420">0</span>
+                        <span class="stat-label">Fans</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Post Section -->
+    <section class="create-post-section">
+        <div class="container">
+            <div class="create-post-card">
+                <div class="user-profile">
+                    <div class="avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="username">Fan de Liga MX</span>
+                        <span class="status">¿Qué está pasando?</span>
+                    </div>
+                </div>
+                
+                <div class="post-composer">
+                    <textarea id="postContent" placeholder="Comparte tu opinión sobre la Liga MX..." maxlength="280"></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span>/280
+                    </div>
+                </div>
+
+                <div class="media-preview" id="mediaPreview" style="display: none;">
+                    <div class="preview-container">
+                        <img id="imagePreview" style="display: none;" alt="Preview">
+                        <video id="videoPreview" style="display: none;" controls></video>
+                        <button class="remove-media" id="removeMedia">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="post-options">
+                    <div class="media-options">
+                        <label for="imageUpload" class="media-btn image-btn">
+                            <i class="fas fa-image"></i>
+                            <span>Foto</span>
+                        </label>
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        
+                        <label for="videoUpload" class="media-btn video-btn">
+                            <i class="fas fa-video"></i>
+                            <span>Video</span>
+                        </label>
+                        <input type="file" id="videoUpload" accept="video/*" style="display: none;">
+                        
+                        <button class="media-btn poll-btn" id="createPoll">
+                            <i class="fas fa-poll"></i>
+                            <span>Encuesta</span>
+                        </button>
+                        
+                        <button class="media-btn emoji-btn" id="emojiPicker">
+                            <i class="fas fa-smile"></i>
+                            <span>Emoji</span>
+                        </button>
+                    </div>
+                    
+                    <div class="post-actions">
+                        <div class="team-selector">
+                            <select id="teamFilter">
+                                <option value="">Todos los equipos</option>
+                            </select>
+                        </div>
+                        <button class="post-btn" id="publishPost">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Publicar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Filters -->
+    <section class="content-filters">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <i class="fas fa-th"></i>
+                    <span>Todo</span>
+                </button>
+                <button class="filter-tab" data-filter="posts">
+                    <i class="fas fa-comment-alt"></i>
+                    <span>Posts</span>
+                </button>
+                <button class="filter-tab" data-filter="videos">
+                    <i class="fas fa-play"></i>
+                    <span>Videos</span>
+                </button>
+                <button class="filter-tab" data-filter="photos">
+                    <i class="fas fa-camera"></i>
+                    <span>Fotos</span>
+                </button>
+                <button class="filter-tab" data-filter="polls">
+                    <i class="fas fa-poll"></i>
+                    <span>Encuestas</span>
+                </button>
+                <button class="filter-tab" data-filter="trending">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                </button>
+            </div>
+            
+            <div class="sort-options">
+                <select id="sortPosts">
+                    <option value="recent">Más recientes</option>
+                    <option value="popular">Más populares</option>
+                    <option value="controversial">Más comentados</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feed Section -->
+    <section class="feed-section">
+        <div class="container">
+            <div class="feed-layout">
+                <!-- Stories Section -->
+                <div class="stories-container">
+                    <div class="stories-header">
+                        <h3>Historias de Fans</h3>
+                        <button class="add-story-btn" id="addStory">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="stories-scroll" id="storiesContainer">
+                        <!-- Stories will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Main Feed -->
+                <div class="main-feed">
+                    <div class="feed-header">
+                        <h3>Feed de Fans</h3>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button class="view-btn" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div class="loading-posts" id="loadingPosts">
+                        <div class="post-skeleton">
+                            <div class="skeleton-header">
+                                <div class="skeleton-avatar"></div>
+                                <div class="skeleton-info">
+                                    <div class="skeleton-line"></div>
+                                    <div class="skeleton-line short"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posts Container -->
+                    <div class="posts-container" id="postsContainer">
+                        <!-- Posts will be loaded here -->
+                    </div>
+                    
+                    <!-- Load More Button -->
+                    <div class="load-more-container">
+                        <button class="load-more-btn" id="loadMorePosts">
+                            <i class="fas fa-plus"></i>
+                            <span>Cargar más posts</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trending Sidebar -->
+                <div class="trending-sidebar">
+                    <div class="trending-card">
+                        <h3>Trending</h3>
+                        <div class="trending-topics" id="trendingTopics">
+                            <!-- Trending topics will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="top-fans-card">
+                        <h3>Top Fans</h3>
+                        <div class="top-fans-list" id="topFansList">
+                            <!-- Top fans will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="live-chat-card">
+                        <h3>Chat en Vivo</h3>
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Live chat messages -->
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
+                            <button id="sendChat">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Post Modal -->
+    <div class="modal" id="postModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Post Detallado</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="postModalBody">
+                <!-- Post details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="auth-modal" id="authModal" style="display: none;">
+        <div class="auth-overlay"></div>
+        <div class="auth-content">
+            <div class="auth-header">
+                <h3>Únete a la Fan Zone</h3>
+                <button class="auth-close" id="closeAuth">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="auth-body">
+                <p>Inicia sesión para participar en la Fan Zone</p>
+                <button class="auth-btn google-auth" id="googleAuth">
+                    <i class="fab fa-google"></i>
+                    <span>Continuar con Google</span>
+                </button>
+                <button class="auth-btn facebook-auth" id="facebookAuth">
+                    <i class="fab fa-facebook"></i>
+                    <span>Continuar con Facebook</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js?v=2024091801"></script>
+    <script src="js/fanzone.js?v=2024091801"></script>
+</body>
+</html>

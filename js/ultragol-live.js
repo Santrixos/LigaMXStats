@@ -33,8 +33,22 @@ function initializeLivePage() {
             console.error('Firebase initialization error:', error);
         }
     } else {
-        console.log('Waiting for Firebase to load...');
-        setTimeout(initializeLivePage, 1000);
+        console.log('Firebase not available, running in offline mode...');
+        // Setup basic functionality even without Firebase
+        setupFormSubmission();
+        setupNavigation();
+        
+        // Show offline message
+        const streamsList = document.getElementById('streamsList');
+        if (streamsList) {
+            streamsList.innerHTML = `
+                <div class="no-streams">
+                    <i class="fas fa-wifi fa-2x" style="color: #ff6633; margin-bottom: 1rem;"></i>
+                    <p>Modo sin conexión</p>
+                    <small style="color: #999;">El formulario está disponible, pero no se pueden cargar transmisiones existentes.</small>
+                </div>
+            `;
+        }
     }
 }
 
@@ -123,11 +137,21 @@ function setupFormSubmission() {
         e.preventDefault();
         
         // Get form data
+        const matchNameEl = document.getElementById('matchName');
+        const urlEl = document.getElementById('streamUrl');
+        const platformEl = document.getElementById('platform');
+        const descriptionEl = document.getElementById('description');
+        
+        if (!matchNameEl || !urlEl || !platformEl) {
+            showMessage('Error: Elementos del formulario no encontrados.', 'error');
+            return;
+        }
+        
         const formData = {
-            matchName: document.getElementById('matchName').value.trim(),
-            url: document.getElementById('streamUrl').value.trim(),
-            platform: document.getElementById('platform').value,
-            description: document.getElementById('description').value.trim()
+            matchName: matchNameEl.value.trim(),
+            url: urlEl.value.trim(),
+            platform: platformEl.value,
+            description: descriptionEl ? descriptionEl.value.trim() : ''
         };
         
         // Validate form

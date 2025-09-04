@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 let currentView = 'cards';
 let currentFilter = 'general';
-let standingsData = [];
+let modernStandingsData = [];
 
 function initializeModernStandings() {
     setupEventListeners();
@@ -67,7 +67,11 @@ function switchView(view) {
 async function loadStandingsData() {
     try {
         const response = await fetch('data/standings.json');
-        standingsData = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        modernStandingsData = await response.json();
+        console.log('✅ Standings data loaded:', modernStandingsData.length, 'teams');
         renderStandings();
     } catch (error) {
         console.error('Error loading standings:', error);
@@ -85,7 +89,7 @@ function renderStandings() {
 
 function renderCardsView() {
     const cardsGrid = document.getElementById('cardsGrid');
-    if (!cardsGrid || !standingsData.length) return;
+    if (!cardsGrid || !modernStandingsData.length) return;
     
     const filteredData = getFilteredData();
     
@@ -95,7 +99,7 @@ function renderCardsView() {
         const form = generateRandomForm(); // Simulated form data
         
         return `
-            <div class="team-card ${classificationClass}" data-team="${team.team}">
+            <div class="team-card ${classificationClass}" data-team="${team.name}">
                 <div class="card-header">
                     <div class="position-badge ${classificationClass}">
                         ${position}
@@ -108,17 +112,17 @@ function renderCardsView() {
                 
                 <div class="team-info">
                     <div class="team-logo">
-                        ${team.team.substring(0, 2).toUpperCase()}
+                        ${team.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div class="team-name">
-                        <h3>${team.team}</h3>
+                        <h3>${team.name}</h3>
                         <p>Liga MX</p>
                     </div>
                 </div>
                 
                 <div class="team-stats">
                     <div class="stat-item">
-                        <span class="stat-value">${team.games}</span>
+                        <span class="stat-value">${team.played}</span>
                         <span class="stat-label">PJ</span>
                     </div>
                     <div class="stat-item">
@@ -134,11 +138,11 @@ function renderCardsView() {
                         <span class="stat-label">P</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${team.goals_for}</span>
+                        <span class="stat-value">${team.goalsFor}</span>
                         <span class="stat-label">GF</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${team.goal_difference > 0 ? '+' : ''}${team.goal_difference}</span>
+                        <span class="stat-value">${(team.goalsFor - team.goalsAgainst) > 0 ? '+' : ''}${team.goalsFor - team.goalsAgainst}</span>
                         <span class="stat-label">DIF</span>
                     </div>
                 </div>
@@ -167,35 +171,36 @@ function renderCardsView() {
 
 function renderTableView() {
     const tableBody = document.getElementById('standingsBody');
-    if (!tableBody || !standingsData.length) return;
+    if (!tableBody || !modernStandingsData.length) return;
     
     const filteredData = getFilteredData();
     
     tableBody.innerHTML = filteredData.map((team, index) => {
         const position = index + 1;
         const classificationClass = getClassificationClass(position);
+        const goalDiff = team.goalsFor - team.goalsAgainst;
         
         return `
-            <tr class="table-row ${classificationClass}" data-team="${team.team}">
+            <tr class="table-row ${classificationClass}" data-team="${team.name}">
                 <td class="pos-col">
                     <span class="position-indicator ${classificationClass}">${position}</span>
                 </td>
                 <td class="team-col">
                     <div class="team-cell">
                         <div class="team-logo-small">
-                            ${team.team.substring(0, 2).toUpperCase()}
+                            ${team.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span class="team-name-text">${team.team}</span>
+                        <span class="team-name-text">${team.name}</span>
                     </div>
                 </td>
-                <td class="stat-col">${team.games}</td>
+                <td class="stat-col">${team.played}</td>
                 <td class="stat-col">${team.wins}</td>
                 <td class="stat-col">${team.draws}</td>
                 <td class="stat-col">${team.losses}</td>
-                <td class="stat-col">${team.goals_for}</td>
-                <td class="stat-col">${team.goals_against}</td>
-                <td class="stat-col ${team.goal_difference > 0 ? 'positive' : team.goal_difference < 0 ? 'negative' : ''}">
-                    ${team.goal_difference > 0 ? '+' : ''}${team.goal_difference}
+                <td class="stat-col">${team.goalsFor}</td>
+                <td class="stat-col">${team.goalsAgainst}</td>
+                <td class="stat-col ${goalDiff > 0 ? 'positive' : goalDiff < 0 ? 'negative' : ''}">
+                    ${goalDiff > 0 ? '+' : ''}${goalDiff}
                 </td>
                 <td class="pts-col"><strong>${team.points}</strong></td>
             </tr>
@@ -206,10 +211,12 @@ function renderTableView() {
 function getFilteredData() {
     // For now, return all data sorted by points
     // In a real app, you would apply home/away filters
-    return [...standingsData].sort((a, b) => {
+    return [...modernStandingsData].sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
-        if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
-        return b.goals_for - a.goals_for;
+        const goalDiffA = a.goalsFor - a.goalsAgainst;
+        const goalDiffB = b.goalsFor - b.goalsAgainst;
+        if (goalDiffB !== goalDiffA) return goalDiffB - goalDiffA;
+        return b.goalsFor - a.goalsFor;
     });
 }
 
