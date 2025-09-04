@@ -43,6 +43,49 @@
                     <a href="ultragol-live.html" class="nav-link">UltraGol LIVE</a>
                 </li>
             </ul>
+            
+            <!-- User Navigation -->
+            <div class="user-nav" id="userNavigation" style="display: none;">
+                <div class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count" id="notificationCount">0</span>
+                </div>
+                <div class="user-avatar" id="navUserAvatar">
+                    <img id="navAvatarImage" style="display: none;" alt="Avatar">
+                    <div class="nav-avatar-placeholder" id="navAvatarPlaceholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="online-status"></div>
+                </div>
+                <div class="user-menu-dropdown" id="userMenuDropdown">
+                    <a href="profile.html" class="menu-item">
+                        <i class="fas fa-user"></i> Mi Perfil
+                    </a>
+                    <a href="#" class="menu-item" onclick="showSettings()">
+                        <i class="fas fa-cog"></i> Configuración
+                    </a>
+                    <a href="#" class="menu-item" onclick="showNotifications()">
+                        <i class="fas fa-bell"></i> Notificaciones
+                    </a>
+                    <div class="menu-divider"></div>
+                    <a href="#" class="menu-item" onclick="signOutUser()">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Auth Buttons -->
+            <div class="auth-buttons" id="authButtons">
+                <button class="btn btn-outline" onclick="openAuthModal('login')">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Iniciar Sesión</span>
+                </button>
+                <button class="btn btn-primary" onclick="openAuthModal('register')">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Registrarse</span>
+                </button>
+            </div>
+            
             <div class="hamburger">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -92,13 +135,28 @@
     <section class="create-post-section">
         <div class="container">
             <div class="create-post-card">
-                <div class="user-profile">
-                    <div class="avatar-placeholder">
-                        <i class="fas fa-user"></i>
+                <div class="user-profile" id="createPostProfile">
+                    <div class="avatar-container">
+                        <div class="avatar-placeholder" id="postAvatarPlaceholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <img id="postAvatarImage" style="display: none;" alt="Avatar">
+                        <div class="user-level-badge" id="userLevelBadge">1</div>
                     </div>
                     <div class="user-info">
-                        <span class="username">Fan de Liga MX</span>
-                        <span class="status">¿Qué está pasando?</span>
+                        <span class="username" id="postUsername">Fan de Liga MX</span>
+                        <span class="status" id="postUserStatus">¿Qué está pasando en la Liga MX?</span>
+                        <div class="user-team-badge" id="userTeamBadge" style="display: none;">
+                            <i class="fas fa-heart"></i>
+                            <span id="userTeamName">Mi Equipo</span>
+                        </div>
+                    </div>
+                    <div class="post-privacy">
+                        <select id="postPrivacy" class="privacy-select">
+                            <option value="public">🌍 Público</option>
+                            <option value="followers">👥 Solo seguidores</option>
+                            <option value="private">🔒 Solo yo</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -125,13 +183,18 @@
                             <i class="fas fa-image"></i>
                             <span>Foto</span>
                         </label>
-                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
                         
                         <label for="videoUpload" class="media-btn video-btn">
                             <i class="fas fa-video"></i>
                             <span>Video</span>
                         </label>
                         <input type="file" id="videoUpload" accept="video/*" style="display: none;">
+                        
+                        <button class="media-btn gif-btn" id="addGif">
+                            <i class="fas fa-magic"></i>
+                            <span>GIF</span>
+                        </button>
                         
                         <button class="media-btn poll-btn" id="createPoll">
                             <i class="fas fa-poll"></i>
@@ -142,6 +205,16 @@
                             <i class="fas fa-smile"></i>
                             <span>Emoji</span>
                         </button>
+                        
+                        <button class="media-btn live-btn" id="goLive">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <span>En Vivo</span>
+                        </button>
+                        
+                        <button class="media-btn location-btn" id="addLocation">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Ubicación</span>
+                        </button>
                     </div>
                     
                     <div class="post-actions">
@@ -149,6 +222,10 @@
                             <select id="teamFilter">
                                 <option value="">Todos los equipos</option>
                             </select>
+                        </div>
+                        <div class="post-schedule" id="postSchedule" style="display: none;">
+                            <i class="fas fa-clock"></i>
+                            <span>Programar</span>
                         </div>
                         <button class="post-btn" id="publishPost">
                             <i class="fas fa-paper-plane"></i>
@@ -168,6 +245,10 @@
                     <i class="fas fa-th"></i>
                     <span>Todo</span>
                 </button>
+                <button class="filter-tab" data-filter="following">
+                    <i class="fas fa-users"></i>
+                    <span>Siguiendo</span>
+                </button>
                 <button class="filter-tab" data-filter="posts">
                     <i class="fas fa-comment-alt"></i>
                     <span>Posts</span>
@@ -183,6 +264,10 @@
                 <button class="filter-tab" data-filter="polls">
                     <i class="fas fa-poll"></i>
                     <span>Encuestas</span>
+                </button>
+                <button class="filter-tab" data-filter="live">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>En Vivo</span>
                 </button>
                 <button class="filter-tab" data-filter="trending">
                     <i class="fas fa-fire"></i>
@@ -263,32 +348,97 @@
                     </div>
                 </div>
 
-                <!-- Trending Sidebar -->
-                <div class="trending-sidebar">
-                    <div class="trending-card">
-                        <h3>Trending</h3>
+                <!-- Enhanced Sidebar -->
+                <div class="enhanced-sidebar">
+                    <!-- Trending Topics -->
+                    <div class="sidebar-card trending-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-fire"></i> Trending</h3>
+                            <button class="refresh-btn" onclick="refreshTrending()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                         <div class="trending-topics" id="trendingTopics">
                             <!-- Trending topics will be loaded here -->
                         </div>
                     </div>
                     
-                    <div class="top-fans-card">
-                        <h3>Top Fans</h3>
+                    <!-- Top Fans -->
+                    <div class="sidebar-card top-fans-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> Top Fans</h3>
+                            <a href="#" class="view-all-link">Ver todos</a>
+                        </div>
                         <div class="top-fans-list" id="topFansList">
                             <!-- Top fans will be loaded here -->
                         </div>
                     </div>
                     
-                    <div class="live-chat-card">
-                        <h3>Chat en Vivo</h3>
+                    <!-- Live Events -->
+                    <div class="sidebar-card live-events-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-broadcast-tower"></i> En Vivo</h3>
+                            <span class="live-indicator">LIVE</span>
+                        </div>
+                        <div class="live-events" id="liveEvents">
+                            <!-- Live events will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Team of the Day -->
+                    <div class="sidebar-card team-spotlight-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-trophy"></i> Equipo del Día</h3>
+                        </div>
+                        <div class="team-spotlight" id="teamSpotlight">
+                            <!-- Team spotlight will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Who to Follow -->
+                    <div class="sidebar-card suggestions-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user-plus"></i> A quién seguir</h3>
+                        </div>
+                        <div class="user-suggestions" id="userSuggestions">
+                            <!-- User suggestions will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Live Chat -->
+                    <div class="sidebar-card chat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-comments"></i> Chat Global</h3>
+                            <div class="chat-controls">
+                                <button class="chat-toggle" id="toggleChat">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="chat-messages" id="chatMessages">
                             <!-- Live chat messages -->
                         </div>
-                        <div class="chat-input">
-                            <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
-                            <button id="sendChat">
+                        <div class="chat-input-container">
+                            <div class="emoji-picker-mini" id="emojiPickerMini">
+                                <button class="emoji-btn-mini" onclick="toggleEmojiPicker()">
+                                    <i class="fas fa-smile"></i>
+                                </button>
+                                <div class="emoji-list" id="emojiList" style="display: none;">
+                                    <span onclick="addEmoji('❤️')">❤️</span>
+                                    <span onclick="addEmoji('😍')">😍</span>
+                                    <span onclick="addEmoji('😂')">😂</span>
+                                    <span onclick="addEmoji('🔥')">🔥</span>
+                                    <span onclick="addEmoji('⚽')">⚽</span>
+                                    <span onclick="addEmoji('🏆')">🏆</span>
+                                </div>
+                            </div>
+                            <input type="text" id="chatInput" placeholder="Mensaje..." maxlength="200">
+                            <button id="sendChat" class="send-chat-btn">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
+                        </div>
+                        <div class="chat-status" id="chatStatus">
+                            <span class="online-count" id="onlineCount">0</span> usuarios en línea
                         </div>
                     </div>
                 </div>
@@ -312,26 +462,208 @@
         </div>
     </div>
 
-    <!-- Authentication Modal -->
+    <!-- Enhanced Authentication Modal -->
     <div class="auth-modal" id="authModal" style="display: none;">
-        <div class="auth-overlay"></div>
+        <div class="auth-overlay" onclick="closeAuthModal()"></div>
         <div class="auth-content">
             <div class="auth-header">
-                <h3>Únete a la Fan Zone</h3>
-                <button class="auth-close" id="closeAuth">
+                <h3 id="authModalTitle">Únete a la Fan Zone</h3>
+                <button class="auth-close" id="closeAuth" onclick="closeAuthModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab" onclick="showAuthTab('login')">
+                    Iniciar Sesión
+                </button>
+                <button class="auth-tab" id="registerTab" onclick="showAuthTab('register')">
+                    Registrarse
+                </button>
+            </div>
+            
             <div class="auth-body">
-                <p>Inicia sesión para participar en la Fan Zone</p>
-                <button class="auth-btn google-auth" id="googleAuth">
-                    <i class="fab fa-google"></i>
-                    <span>Continuar con Google</span>
+                <!-- Login Form -->
+                <div class="auth-form" id="loginForm">
+                    <p class="auth-subtitle">Inicia sesión para unirte a la conversación</p>
+                    
+                    <form id="emailLoginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Correo electrónico</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Contraseña</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="auth-btn primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Iniciar Sesión</span>
+                        </button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>o</span>
+                    </div>
+                    
+                    <button class="auth-btn google-auth" id="googleAuth">
+                        <i class="fab fa-google"></i>
+                        <span>Continuar con Google</span>
+                    </button>
+                    
+                    <div class="auth-footer">
+                        <a href="#" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+                
+                <!-- Register Form -->
+                <div class="auth-form" id="registerForm" style="display: none;">
+                    <p class="auth-subtitle">Crea tu cuenta y compártete con otros fans</p>
+                    
+                    <form id="emailRegisterForm">
+                        <div class="form-group">
+                            <label for="registerName">Nombre completo</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Correo electrónico</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Contraseña</label>
+                            <input type="password" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="favoriteTeamRegister">Equipo favorito</label>
+                            <select id="favoriteTeamRegister">
+                                <option value="">Seleccionar equipo</option>
+                            </select>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="acceptTerms" required>
+                                <span class="checkmark"></span>
+                                Acepto los <a href="#" target="_blank">términos y condiciones</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="auth-btn primary">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Crear Cuenta</span>
+                        </button>
+                    </form>
+                    
+                    <div class="auth-divider">
+                        <span>o</span>
+                    </div>
+                    
+                    <button class="auth-btn google-auth" id="googleRegister">
+                        <i class="fab fa-google"></i>
+                        <span>Registrarse con Google</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel" style="display: none;">
+        <div class="panel-header">
+            <h3>Notificaciones</h3>
+            <div class="panel-actions">
+                <button class="mark-all-read" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i>
                 </button>
-                <button class="auth-btn facebook-auth" id="facebookAuth">
-                    <i class="fab fa-facebook"></i>
-                    <span>Continuar con Facebook</span>
+                <button class="close-panel" onclick="hideNotifications()">
+                    <i class="fas fa-times"></i>
                 </button>
+            </div>
+        </div>
+        <div class="notifications-content" id="notificationsContent">
+            <!-- Notifications will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Emoji Picker Modal -->
+    <div class="emoji-picker-modal" id="emojiPickerModal" style="display: none;">
+        <div class="emoji-categories">
+            <button class="emoji-category active" data-category="recent">🕒</button>
+            <button class="emoji-category" data-category="people">😊</button>
+            <button class="emoji-category" data-category="nature">🌿</button>
+            <button class="emoji-category" data-category="food">🍕</button>
+            <button class="emoji-category" data-category="activities">⚽</button>
+            <button class="emoji-category" data-category="travel">🚗</button>
+            <button class="emoji-category" data-category="objects">📱</button>
+            <button class="emoji-category" data-category="symbols">💯</button>
+        </div>
+        <div class="emoji-grid" id="emojiGrid">
+            <!-- Emojis will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- GIF Picker Modal -->
+    <div class="gif-picker-modal" id="gifPickerModal" style="display: none;">
+        <div class="gif-search">
+            <input type="text" id="gifSearch" placeholder="Buscar GIFs...">
+            <button onclick="searchGifs()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <div class="gif-categories">
+            <button class="gif-category active" data-category="trending">Trending</button>
+            <button class="gif-category" data-category="futbol">Fútbol</button>
+            <button class="gif-category" data-category="celebration">Celebración</button>
+            <button class="gif-category" data-category="reaction">Reacciones</button>
+        </div>
+        <div class="gif-grid" id="gifGrid">
+            <!-- GIFs will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Poll Creation Modal -->
+    <div class="poll-modal" id="pollModal" style="display: none;">
+        <div class="modal-overlay" onclick="closePollModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Encuesta</h3>
+                <button class="modal-close" onclick="closePollModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="pollForm">
+                    <div class="form-group">
+                        <label for="pollQuestion">Pregunta</label>
+                        <input type="text" id="pollQuestion" placeholder="¿Cuál es tu equipo favorito?" required>
+                    </div>
+                    <div class="poll-options" id="pollOptions">
+                        <div class="form-group">
+                            <label>Opción 1</label>
+                            <input type="text" class="poll-option" placeholder="Primera opción" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Opción 2</label>
+                            <input type="text" class="poll-option" placeholder="Segunda opción" required>
+                        </div>
+                    </div>
+                    <div class="poll-actions">
+                        <button type="button" class="add-option" onclick="addPollOption()">
+                            <i class="fas fa-plus"></i> Agregar opción
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label for="pollDuration">Duración</label>
+                        <select id="pollDuration">
+                            <option value="1">1 hora</option>
+                            <option value="6">6 horas</option>
+                            <option value="24" selected>1 día</option>
+                            <option value="168">1 semana</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePollModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Encuesta</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

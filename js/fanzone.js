@@ -1,55 +1,108 @@
-// Fan Zone JavaScript - Modern Social Media Functionality with Firebase
+// Fan Zone JavaScript - Enhanced Professional Social Media Platform
 document.addEventListener('DOMContentLoaded', function() {
     initializeFanZone();
 });
 
 // Global variables
 let currentUser = null;
+let userProfile = null;
 let allPosts = [];
+let notifications = [];
 let currentFilter = 'all';
 let currentSort = 'recent';
 let isLoading = false;
 let lastPostDoc = null;
 let postsPerPage = 10;
+let chatMessages = [];
+let onlineUsers = new Set();
+let followingUsers = new Set();
+let pollVotes = new Map();
+
+// Firebase collections
+const COLLECTIONS = {
+    users: 'users',
+    posts: 'posts',
+    notifications: 'notifications',
+    chats: 'globalChat',
+    polls: 'polls',
+    follows: 'follows'
+};
+
+// Teams data
+const LIGA_MX_TEAMS = [
+    { id: 'america', name: 'América', color: '#FFCC00' },
+    { id: 'chivas', name: 'Chivas', color: '#E63946' },
+    { id: 'pumas', name: 'Pumas', color: '#003366' },
+    { id: 'cruz_azul', name: 'Cruz Azul', color: '#0066CC' },
+    { id: 'tigres', name: 'Tigres', color: '#FF6B00' },
+    { id: 'monterrey', name: 'Monterrey', color: '#1E3D72' },
+    { id: 'santos', name: 'Santos', color: '#00A86B' },
+    { id: 'toluca', name: 'Toluca', color: '#C8102E' },
+    { id: 'atlas', name: 'Atlas', color: '#E63946' },
+    { id: 'leon', name: 'León', color: '#228B22' },
+    { id: 'pachuca', name: 'Pachuca', color: '#0066CC' },
+    { id: 'necaxa', name: 'Necaxa', color: '#E63946' },
+    { id: 'puebla', name: 'Puebla', color: '#1E3D72' },
+    { id: 'queretaro', name: 'Querétaro', color: '#000080' },
+    { id: 'tijuana', name: 'Tijuana', color: '#E63946' },
+    { id: 'mazatlan', name: 'Mazatlán', color: '#800080' },
+    { id: 'juarez', name: 'Juárez', color: '#228B22' },
+    { id: 'atletico_san_luis', name: 'Atlético San Luis', color: '#E63946' }
+];
 
 // Initialize Fan Zone
 function initializeFanZone() {
-    console.log('🎯 Fan Zone initializing...');
+    console.log('🎯 Enhanced Fan Zone initializing...');
     
     // Check Firebase availability
     if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-        console.log('🔥 Firebase available, setting up Fan Zone with real-time features');
+        console.log('🔥 Firebase available, setting up professional features');
         setupFirebaseFeatures();
     } else {
         console.log('📱 Running Fan Zone in demo mode');
         setupDemoMode();
     }
     
-    // Setup basic functionality
+    // Setup core functionality
     setupEventListeners();
     setupNavigation();
-    animateCounters();
+    setupAuthHandlers();
+    setupNotificationSystem();
+    setupChatSystem();
+    setupEmojiPicker();
+    setupGifPicker();
+    setupPollSystem();
     loadTeamsData();
+    animateCounters();
     
     // Setup filters and sorting
     setupFilters();
     
     // Load initial content
     loadInitialContent();
+    
+    // Start real-time updates
+    startRealtimeUpdates();
 }
 
 // Setup Firebase features
 function setupFirebaseFeatures() {
     try {
         // Authentication state listener
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             currentUser = user;
-            updateUIForAuthState(user);
             if (user) {
                 console.log('✅ User authenticated:', user.displayName || user.email);
+                userProfile = await loadUserProfile(user.uid);
+                updateUIForAuthState(user);
+                setupUserPresence(user.uid);
                 loadUserPosts();
+                loadUserNotifications();
+                loadFollowingUsers();
             } else {
                 console.log('❌ User not authenticated');
+                userProfile = null;
+                updateUIForAuthState(null);
                 loadPublicPosts();
             }
         });
@@ -63,14 +116,438 @@ function setupFirebaseFeatures() {
     }
 }
 
+// Load user profile
+async function loadUserProfile(userId) {
+    try {
+        const userDoc = await firebase.firestore().collection(COLLECTIONS.users).doc(userId).get();
+        if (userDoc.exists) {
+            return userDoc.data();
+        } else {
+            // Create default profile
+            const defaultProfile = {
+                uid: userId,
+                displayName: currentUser.displayName || 'Usuario',
+                email: currentUser.email,
+                photoURL: currentUser.photoURL || null,
+                bio: '',
+                favoriteTeam: '',
+                location: '',
+                website: '',
+                socialLinks: {},
+                isPrivate: false,
+                showOnlineStatus: true,
+                allowMessages: true,
+                joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                stats: {
+                    posts: 0,
+                    followers: 0,
+                    following: 0,
+                    likes: 0,
+                    comments: 0
+                },
+                achievements: [],
+                level: 1,
+                isVerified: false
+            };
+            
+            await firebase.firestore().collection(COLLECTIONS.users).doc(userId).set(defaultProfile);
+            return defaultProfile;
+        }
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        return null;
+    }
+}
+
+// Setup user presence
+function setupUserPresence(userId) {
+    const presenceRef = firebase.database().ref(`presence/${userId}`);
+    const connectedRef = firebase.database().ref('.info/connected');
+    
+    connectedRef.on('value', (snapshot) => {
+        if (snapshot.val() === true) {
+            onlineUsers.add(userId);
+            presenceRef.onDisconnect().remove();
+            presenceRef.set({
+                online: true,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+    });
+}
+
+// Load following users
+async function loadFollowingUsers() {
+    if (!currentUser) return;
+    
+    try {
+        const followingSnapshot = await firebase.firestore()
+            .collection(COLLECTIONS.follows)
+            .where('followerId', '==', currentUser.uid)
+            .get();
+            
+        followingUsers.clear();
+        followingSnapshot.forEach(doc => {
+            followingUsers.add(doc.data().followingId);
+        });
+        
+        console.log(`Following ${followingUsers.size} users`);
+    } catch (error) {
+        console.error('Error loading following users:', error);
+    }
+}
+
 // Setup demo mode with sample data
 function setupDemoMode() {
-    console.log('🎮 Setting up Fan Zone demo mode');
+    console.log('🎮 Setting up Enhanced Fan Zone demo mode');
     generateSamplePosts();
     generateSampleStories();
     generateTrendingTopics();
     generateTopFans();
+    generateLiveEvents();
+    generateUserSuggestions();
+    generateTeamSpotlight();
+    generateSampleNotifications();
     setupDemoChat();
+    
+    // Simulate user data
+    userProfile = {
+        displayName: 'Fan de Liga MX',
+        photoURL: null,
+        favoriteTeam: 'america',
+        level: 5,
+        isVerified: false,
+        stats: {
+            posts: 23,
+            followers: 156,
+            following: 89,
+            likes: 342,
+            comments: 78
+        }
+    };
+    
+    updateCreatePostProfile();
+    updateUserNavigation();
+}
+
+// Setup Enhanced Authentication Handlers
+function setupAuthHandlers() {
+    // Auth modal handlers
+    const authModal = document.getElementById('authModal');
+    const authOverlay = document.querySelector('.auth-overlay');
+    
+    // Modal controls
+    window.openAuthModal = function(type = 'login') {
+        if (authModal) {
+            authModal.style.display = 'flex';
+            showAuthTab(type);
+        }
+    };
+    
+    window.closeAuthModal = function() {
+        if (authModal) {
+            authModal.style.display = 'none';
+        }
+    };
+    
+    window.showAuthTab = function(type) {
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const modalTitle = document.getElementById('authModalTitle');
+        
+        if (type === 'login') {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            modalTitle.textContent = 'Iniciar Sesión';
+        } else {
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            modalTitle.textContent = 'Crear Cuenta';
+        }
+    };
+    
+    // Form submissions
+    const emailLoginForm = document.getElementById('emailLoginForm');
+    const emailRegisterForm = document.getElementById('emailRegisterForm');
+    
+    if (emailLoginForm) {
+        emailLoginForm.addEventListener('submit', handleEmailLogin);
+    }
+    
+    if (emailRegisterForm) {
+        emailRegisterForm.addEventListener('submit', handleEmailRegister);
+    }
+    
+    // Social auth buttons
+    const googleAuth = document.getElementById('googleAuth');
+    const googleRegister = document.getElementById('googleRegister');
+    
+    if (googleAuth) googleAuth.addEventListener('click', signInWithGoogle);
+    if (googleRegister) googleRegister.addEventListener('click', signInWithGoogle);
+}
+
+// Handle Email Login
+async function handleEmailLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        closeAuthModal();
+        showNotification('¡Bienvenido de vuelta!', 'success');
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Error al iniciar sesión: ' + error.message, 'error');
+    }
+}
+
+// Handle Email Register
+async function handleEmailRegister(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('registerName').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const favoriteTeam = document.getElementById('favoriteTeamRegister').value;
+    
+    try {
+        const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        
+        // Update profile
+        await result.user.updateProfile({
+            displayName: name
+        });
+        
+        // Create user document
+        await firebase.firestore().collection('users').doc(result.user.uid).set({
+            uid: result.user.uid,
+            displayName: name,
+            email: email,
+            favoriteTeam: favoriteTeam,
+            joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+            stats: { posts: 0, followers: 0, following: 0, likes: 0, comments: 0 }
+        });
+        
+        closeAuthModal();
+        showNotification('¡Cuenta creada exitosamente!', 'success');
+    } catch (error) {
+        console.error('Register error:', error);
+        showNotification('Error al crear cuenta: ' + error.message, 'error');
+    }
+}
+
+// Setup Notification System
+function setupNotificationSystem() {
+    // Notification handlers
+    window.showNotifications = function() {
+        const panel = document.getElementById('notificationsPanel');
+        if (panel) {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    };
+    
+    window.hideNotifications = function() {
+        const panel = document.getElementById('notificationsPanel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    };
+    
+    window.markAllAsRead = function() {
+        notifications.forEach(n => n.read = true);
+        updateNotificationCount();
+        renderNotifications();
+    };
+    
+    // Notification bell click
+    const notificationBell = document.getElementById('notificationBell');
+    if (notificationBell) {
+        notificationBell.addEventListener('click', showNotifications);
+    }
+}
+
+// Setup Chat System
+function setupChatSystem() {
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+    
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+    }
+    
+    if (sendChat) {
+        sendChat.addEventListener('click', handleSendMessage);
+    }
+    
+    // Toggle chat
+    window.toggleChat = function() {
+        const chatCard = document.querySelector('.chat-card');
+        if (chatCard) {
+            chatCard.classList.toggle('expanded');
+        }
+    };
+    
+    // Update online count
+    updateOnlineCount();
+    setInterval(updateOnlineCount, 30000); // Update every 30 seconds
+}
+
+// Setup Emoji Picker
+function setupEmojiPicker() {
+    const emojiBtn = document.getElementById('emojiPicker');
+    const emojiModal = document.getElementById('emojiPickerModal');
+    
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', () => {
+            if (emojiModal) {
+                emojiModal.style.display = emojiModal.style.display === 'none' ? 'block' : 'none';
+                if (emojiModal.style.display === 'block') {
+                    loadEmojis();
+                }
+            }
+        });
+    }
+    
+    // Emoji picker mini
+    window.toggleEmojiPicker = function() {
+        const emojiList = document.getElementById('emojiList');
+        if (emojiList) {
+            emojiList.style.display = emojiList.style.display === 'none' ? 'flex' : 'none';
+        }
+    };
+    
+    window.addEmoji = function(emoji) {
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+            chatInput.value += emoji;
+            chatInput.focus();
+        }
+        
+        const emojiList = document.getElementById('emojiList');
+        if (emojiList) {
+            emojiList.style.display = 'none';
+        }
+    };
+}
+
+// Setup GIF Picker
+function setupGifPicker() {
+    const gifBtn = document.getElementById('addGif');
+    const gifModal = document.getElementById('gifPickerModal');
+    
+    if (gifBtn) {
+        gifBtn.addEventListener('click', () => {
+            if (gifModal) {
+                gifModal.style.display = gifModal.style.display === 'none' ? 'block' : 'none';
+                if (gifModal.style.display === 'block') {
+                    loadTrendingGifs();
+                }
+            }
+        });
+    }
+    
+    window.searchGifs = function() {
+        const searchTerm = document.getElementById('gifSearch').value;
+        if (searchTerm) {
+            // In a real implementation, this would search GIFs via API
+            console.log('Searching GIFs for:', searchTerm);
+        }
+    };
+}
+
+// Setup Poll System
+function setupPollSystem() {
+    const pollBtn = document.getElementById('createPoll');
+    const pollModal = document.getElementById('pollModal');
+    
+    if (pollBtn) {
+        pollBtn.addEventListener('click', () => {
+            if (pollModal) {
+                pollModal.style.display = 'flex';
+            }
+        });
+    }
+    
+    window.closePollModal = function() {
+        const pollModal = document.getElementById('pollModal');
+        if (pollModal) {
+            pollModal.style.display = 'none';
+        }
+    };
+    
+    window.addPollOption = function() {
+        const pollOptions = document.getElementById('pollOptions');
+        const optionCount = pollOptions.children.length + 1;
+        
+        if (optionCount <= 6) { // Max 6 options
+            const newOption = document.createElement('div');
+            newOption.className = 'form-group';
+            newOption.innerHTML = `
+                <label>Opción ${optionCount}</label>
+                <input type="text" class="poll-option" placeholder="Nueva opción" required>
+            `;
+            pollOptions.appendChild(newOption);
+        }
+    };
+    
+    const pollForm = document.getElementById('pollForm');
+    if (pollForm) {
+        pollForm.addEventListener('submit', handleCreatePoll);
+    }
+}
+
+// Handle Create Poll
+async function handleCreatePoll(e) {
+    e.preventDefault();
+    
+    const question = document.getElementById('pollQuestion').value;
+    const optionInputs = document.querySelectorAll('.poll-option');
+    const duration = document.getElementById('pollDuration').value;
+    
+    const options = Array.from(optionInputs).map(input => input.value).filter(val => val.trim());
+    
+    if (options.length < 2) {
+        showNotification('La encuesta debe tener al menos 2 opciones', 'warning');
+        return;
+    }
+    
+    const poll = {
+        question,
+        options: options.map(option => ({ text: option, votes: 0 })),
+        duration: parseInt(duration),
+        createdBy: currentUser?.uid || 'demo-user',
+        createdAt: new Date(),
+        totalVotes: 0
+    };
+    
+    try {
+        if (currentUser && firebase.apps.length > 0) {
+            await firebase.firestore().collection('polls').add(poll);
+        }
+        
+        showNotification('¡Encuesta creada exitosamente!', 'success');
+        closePollModal();
+        
+        // Add to posts feed
+        addPollToFeed(poll);
+        
+    } catch (error) {
+        console.error('Error creating poll:', error);
+        showNotification('Error al crear la encuesta', 'error');
+    }
 }
 
 // Setup event listeners
@@ -1101,4 +1578,396 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('🎯 Fan Zone script loaded successfully');
+// Additional Enhanced Functions for Professional Fanzone
+
+// Generate Sample Notifications
+function generateSampleNotifications() {
+    notifications = [
+        {
+            id: 1,
+            type: 'like',
+            user: 'Juan Carlos',
+            avatar: null,
+            message: 'le gusta tu publicación sobre el América',
+            timestamp: new Date(Date.now() - 5 * 60 * 1000),
+            read: false
+        },
+        {
+            id: 2,
+            type: 'comment',
+            user: 'María González',
+            avatar: null,
+            message: 'comentó en tu post',
+            timestamp: new Date(Date.now() - 15 * 60 * 1000),
+            read: false
+        },
+        {
+            id: 3,
+            type: 'follow',
+            user: 'Carlos Vela Fan',
+            avatar: null,
+            message: 'comenzó a seguirte',
+            timestamp: new Date(Date.now() - 30 * 60 * 1000),
+            read: true
+        }
+    ];
+    
+    updateNotificationCount();
+    renderNotifications();
+}
+
+// Update Notification Count
+function updateNotificationCount() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const notificationCount = document.getElementById('notificationCount');
+    if (notificationCount) {
+        notificationCount.textContent = unreadCount;
+        notificationCount.style.display = unreadCount > 0 ? 'flex' : 'none';
+    }
+}
+
+// Render Notifications
+function renderNotifications() {
+    const notificationsContent = document.getElementById('notificationsContent');
+    if (!notificationsContent) return;
+    
+    notificationsContent.innerHTML = notifications.map(notification => `
+        <div class="notification-item ${notification.read ? 'read' : 'unread'}">
+            <div class="notification-avatar">
+                ${notification.avatar ? 
+                    `<img src="${notification.avatar}" alt="${notification.user}">` :
+                    `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`
+                }
+            </div>
+            <div class="notification-content">
+                <div class="notification-text">
+                    <strong>${notification.user}</strong> ${notification.message}
+                </div>
+                <div class="notification-time">${getTimeAgo(notification.timestamp)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Generate Live Events
+function generateLiveEvents() {
+    const liveEvents = document.getElementById('liveEvents');
+    if (liveEvents) {
+        liveEvents.innerHTML = `
+            <div class="live-event">
+                <div class="live-event-indicator">🔴 EN VIVO</div>
+                <div class="live-event-title">América vs Chivas</div>
+                <div class="live-event-time">Min 45' - HT</div>
+                <div class="live-event-score">2-1</div>
+            </div>
+            <div class="live-event">
+                <div class="live-event-indicator">⚡ PRÓXIMO</div>
+                <div class="live-event-title">Tigres vs Pumas</div>
+                <div class="live-event-time">En 2 horas</div>
+            </div>
+        `;
+    }
+}
+
+// Generate User Suggestions
+function generateUserSuggestions() {
+    const userSuggestions = document.getElementById('userSuggestions');
+    if (userSuggestions) {
+        userSuggestions.innerHTML = `
+            <div class="user-suggestion">
+                <div class="suggestion-avatar">
+                    <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                </div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">Carlos Vela</div>
+                    <div class="suggestion-meta">Seguido por 3 amigos</div>
+                </div>
+                <button class="follow-btn">Seguir</button>
+            </div>
+            <div class="user-suggestion">
+                <div class="suggestion-avatar">
+                    <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                </div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">Ana Futbol</div>
+                    <div class="suggestion-meta">Fan de León</div>
+                </div>
+                <button class="follow-btn">Seguir</button>
+            </div>
+        `;
+    }
+}
+
+// Generate Team Spotlight
+function generateTeamSpotlight() {
+    const teamSpotlight = document.getElementById('teamSpotlight');
+    if (teamSpotlight) {
+        teamSpotlight.innerHTML = `
+            <div class="team-spotlight-content">
+                <div class="team-logo">
+                    <div style="background: #FFCC00; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000;">AME</div>
+                </div>
+                <div class="team-info">
+                    <h4>Club América</h4>
+                    <p>Líder de la temporada con una racha de 5 victorias consecutivas.</p>
+                    <div class="team-stats">
+                        <span>🏆 15 títulos</span>
+                        <span>⚽ 34 goles</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Update Create Post Profile
+function updateCreatePostProfile() {
+    const postAvatarPlaceholder = document.getElementById('postAvatarPlaceholder');
+    const postAvatarImage = document.getElementById('postAvatarImage');
+    const postUsername = document.getElementById('postUsername');
+    const userLevelBadge = document.getElementById('userLevelBadge');
+    const userTeamBadge = document.getElementById('userTeamBadge');
+    const userTeamName = document.getElementById('userTeamName');
+    
+    if (userProfile) {
+        if (postUsername) postUsername.textContent = userProfile.displayName;
+        if (userLevelBadge) userLevelBadge.textContent = userProfile.level || 1;
+        
+        if (userProfile.photoURL && postAvatarImage) {
+            postAvatarImage.src = userProfile.photoURL;
+            postAvatarImage.style.display = 'block';
+            if (postAvatarPlaceholder) postAvatarPlaceholder.style.display = 'none';
+        }
+        
+        if (userProfile.favoriteTeam && userTeamBadge && userTeamName) {
+            const team = LIGA_MX_TEAMS.find(t => t.id === userProfile.favoriteTeam);
+            if (team) {
+                userTeamName.textContent = team.name;
+                userTeamBadge.style.display = 'flex';
+            }
+        }
+    }
+}
+
+// Update User Navigation
+function updateUserNavigation() {
+    const userNavigation = document.getElementById('userNavigation');
+    const authButtons = document.getElementById('authButtons');
+    const navAvatarPlaceholder = document.getElementById('navAvatarPlaceholder');
+    const navAvatarImage = document.getElementById('navAvatarImage');
+    
+    if (currentUser || userProfile) {
+        if (userNavigation) userNavigation.style.display = 'flex';
+        if (authButtons) authButtons.style.display = 'none';
+        
+        if (userProfile?.photoURL && navAvatarImage) {
+            navAvatarImage.src = userProfile.photoURL;
+            navAvatarImage.style.display = 'block';
+            if (navAvatarPlaceholder) navAvatarPlaceholder.style.display = 'none';
+        }
+    } else {
+        if (userNavigation) userNavigation.style.display = 'none';
+        if (authButtons) authButtons.style.display = 'flex';
+    }
+}
+
+// Handle Send Message
+function handleSendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    if (!chatInput || !chatInput.value.trim()) return;
+    
+    const message = chatInput.value.trim();
+    const timestamp = new Date();
+    
+    const chatMessage = {
+        id: Date.now(),
+        user: userProfile?.displayName || 'Usuario',
+        message: message,
+        timestamp: timestamp,
+        avatar: userProfile?.photoURL || null
+    };
+    
+    chatMessages.push(chatMessage);
+    renderChatMessage(chatMessage);
+    
+    chatInput.value = '';
+    
+    // Simulate other users' responses in demo mode
+    if (!currentUser) {
+        setTimeout(() => {
+            const responses = [
+                '¡Totalmente de acuerdo! ⚽',
+                'Excelente punto 👍',
+                'No puedo esperar al próximo partido 🔥',
+                'Mi equipo va a ganar seguro 💪',
+                '¡Vamos Liga MX! 🇲🇽'
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            const botMessage = {
+                id: Date.now() + 1,
+                user: 'Fan de Liga MX',
+                message: randomResponse,
+                timestamp: new Date(),
+                avatar: null
+            };
+            
+            chatMessages.push(botMessage);
+            renderChatMessage(botMessage);
+        }, 1000 + Math.random() * 2000);
+    }
+}
+
+// Render Chat Message
+function renderChatMessage(message) {
+    const chatMessagesContainer = document.getElementById('chatMessages');
+    if (!chatMessagesContainer) return;
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message';
+    messageElement.innerHTML = `
+        <div class="message-avatar">
+            ${message.avatar ? 
+                `<img src="${message.avatar}" alt="${message.user}">` :
+                `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`
+            }
+        </div>
+        <div class="message-content">
+            <div class="message-header">
+                <span class="message-user">${message.user}</span>
+                <span class="message-time">${getTimeAgo(message.timestamp)}</span>
+            </div>
+            <div class="message-text">${message.message}</div>
+        </div>
+    `;
+    
+    chatMessagesContainer.appendChild(messageElement);
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+// Update Online Count
+function updateOnlineCount() {
+    const onlineCount = document.getElementById('onlineCount');
+    if (onlineCount) {
+        const count = Math.floor(Math.random() * 50) + 150;
+        onlineCount.textContent = count;
+    }
+}
+
+// Load Emojis
+function loadEmojis() {
+    const emojiGrid = document.getElementById('emojiGrid');
+    if (!emojiGrid) return;
+    
+    const emojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕'];
+    
+    emojiGrid.innerHTML = emojis.map(emoji => 
+        `<span class="emoji-item" onclick="insertEmoji('${emoji}')">${emoji}</span>`
+    ).join('');
+}
+
+// Insert Emoji
+function insertEmoji(emoji) {
+    const postContent = document.getElementById('postContent');
+    if (postContent) {
+        postContent.value += emoji;
+        postContent.focus();
+    }
+    
+    const emojiModal = document.getElementById('emojiPickerModal');
+    if (emojiModal) {
+        emojiModal.style.display = 'none';
+    }
+}
+
+// Load Trending GIFs
+function loadTrendingGifs() {
+    const gifGrid = document.getElementById('gifGrid');
+    if (!gifGrid) return;
+    
+    gifGrid.innerHTML = `
+        <div class="gif-placeholder">
+            <div class="gif-item">🎬 GIF 1</div>
+            <div class="gif-item">⚽ GIF 2</div>
+            <div class="gif-item">🔥 GIF 3</div>
+            <div class="gif-item">🎉 GIF 4</div>
+            <div class="gif-item">👏 GIF 5</div>
+            <div class="gif-item">💪 GIF 6</div>
+        </div>
+    `;
+}
+
+// Add Poll to Feed
+function addPollToFeed(poll) {
+    console.log('Poll added to feed:', poll);
+    showNotification('¡Encuesta publicada en el feed!', 'success');
+}
+
+// Start Realtime Updates
+function startRealtimeUpdates() {
+    setInterval(() => {
+        updateOnlineCount();
+        if (notifications.length > 0 && Math.random() > 0.7) {
+            const newNotification = {
+                id: Date.now(),
+                type: 'like',
+                user: 'Nuevo Fan',
+                message: 'le gusta tu publicación',
+                timestamp: new Date(),
+                read: false
+            };
+            notifications.unshift(newNotification);
+            updateNotificationCount();
+        }
+    }, 30000);
+}
+
+// Load User Notifications
+async function loadUserNotifications() {
+    if (!currentUser) return;
+    
+    try {
+        const notificationsSnapshot = await firebase.firestore()
+            .collection(COLLECTIONS.notifications)
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .limit(20)
+            .get();
+            
+        notifications = notificationsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        updateNotificationCount();
+        renderNotifications();
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        generateSampleNotifications();
+    }
+}
+
+// Global window functions
+window.signOutUser = async function() {
+    try {
+        if (firebase.apps.length > 0) {
+            await firebase.auth().signOut();
+        }
+        showNotification('Sesión cerrada exitosamente', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+        console.error('Error signing out:', error);
+    }
+};
+
+window.showSettings = function() {
+    showNotification('Configuración - Próximamente', 'info');
+};
+
+window.refreshTrending = function() {
+    generateTrendingTopics();
+    showNotification('Trending actualizado', 'success');
+};
+
+console.log('🎯 Enhanced Fan Zone script loaded successfully');
