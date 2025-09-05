@@ -840,10 +840,26 @@ function closeAuthModal() {
 
 // Update UI based on authentication state
 function updateUIForAuthState(user) {
+    const authButtons = document.getElementById('authButtons');
+    const userNavigation = document.getElementById('userNavigation');
     const userProfile = document.querySelector('.user-profile');
     const avatarPlaceholder = document.querySelector('.avatar-placeholder');
     const username = document.querySelector('.username');
     
+    // Control auth buttons visibility
+    if (user) {
+        // User is authenticated - hide auth buttons, show user navigation
+        if (authButtons) authButtons.style.display = 'none';
+        if (userNavigation) userNavigation.style.display = 'flex';
+        console.log('🎯 UI updated for authenticated user');
+    } else {
+        // User is not authenticated - show auth buttons, hide user navigation
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userNavigation) userNavigation.style.display = 'none';
+        console.log('🎯 UI updated for guest user');
+    }
+    
+    // Update user profile elements
     if (user && userProfile) {
         if (avatarPlaceholder) {
             if (user.photoURL) {
@@ -857,6 +873,10 @@ function updateUIForAuthState(user) {
             username.textContent = user.displayName || user.email || 'Fan de Liga MX';
         }
     }
+    
+    // Update additional UI elements
+    updateUserNavigation();
+    updateCreatePostProfile();
 }
 
 // Load posts
