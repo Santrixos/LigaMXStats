@@ -9,7 +9,7 @@ let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let currentView = 'jornada'; // 'jornada' or 'month'
 let jornadasData = [];
-let teamsData = [];
+let calendarTeamsData = [];
 let allMatches = [];
 let filteredMatches = [];
 let selectedTeam = '';
@@ -25,8 +25,9 @@ const days = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
 // Inicializar sistema de calendario
 async function initializeCalendar() {
     try {
+        // Cargar jornadas primero, luego el resto
+        await loadJornadasData();
         await Promise.all([
-            loadJornadasData(),
             loadTeamsData(),
             loadFixturesData()
         ]);
@@ -47,6 +48,7 @@ async function initializeCalendar() {
 async function loadJornadasData() {
     try {
         const response = await fetch('data/jornadas.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         const data = await response.json();
         jornadasData = data.jornadas;
         return jornadasData;
@@ -62,11 +64,12 @@ async function loadJornadasData() {
 async function loadTeamsData() {
     try {
         const response = await fetch('data/teams.json');
-        teamsData = await response.json();
-        return teamsData;
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        calendarTeamsData = await response.json();
+        return calendarTeamsData;
     } catch (error) {
         console.error('Error cargando datos de equipos:', error);
-        teamsData = [];
+        calendarTeamsData = [];
         return [];
     }
 }
@@ -75,6 +78,7 @@ async function loadTeamsData() {
 async function loadFixturesData() {
     try {
         const response = await fetch('data/fixtures.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         const fixtures = await response.json();
         
         // Combinar partidos de jornadas y fixtures
@@ -256,8 +260,13 @@ function generateJornadasSelector() {
 
 // Mostrar jornada específica
 function displayJornada(jornadaNum) {
+    console.log('🏟️ DisplayJornada llamado con jornada:', jornadaNum);
     const jornada = jornadasData[jornadaNum - 1];
-    if (!jornada) return;
+    if (!jornada) {
+        console.error('❌ Jornada no encontrada:', jornadaNum, 'Total jornadas:', jornadasData.length);
+        return;
+    }
+    console.log('✅ Jornada encontrada:', jornada.numero, 'con', jornada.partidos?.length || 0, 'partidos');
     
     // Actualizar título
     const currentJornadaElement = document.getElementById('currentJornada');
@@ -276,7 +285,8 @@ function displayJornada(jornadaNum) {
     }
     
     // Mostrar partidos
-    displayPartidos(jornada.partidos);
+    console.log('🎯 Llamando displayPartidos con:', jornada.partidos?.length || 0, 'partidos');
+    displayPartidos(jornada.partidos || []);
     
     // Actualizar controles
     updateJornadaSelector();
@@ -285,9 +295,14 @@ function displayJornada(jornadaNum) {
 
 // Mostrar partidos de la jornada
 function displayPartidos(partidos) {
+    console.log('📅 DisplayPartidos llamado con:', partidos?.length || 0, 'partidos');
     const matchesGrid = document.getElementById('matchesGrid');
-    if (!matchesGrid) return;
+    if (!matchesGrid) {
+        console.error('❌ Elemento matchesGrid no encontrado');
+        return;
+    }
     
+    console.log('✅ matchesGrid encontrado, limpiando contenido');
     matchesGrid.innerHTML = '';
     
     // Filtrar partidos si hay filtros aplicados
@@ -403,7 +418,7 @@ function switchView(viewType) {
     const matchesSection = document.querySelector('.jornada-matches');
     
     // Actualizar botones
-    if (jornadaViewBtn && monthViewBtn) {
+    if (jornadaViewBtn && jornadaViewBtn.classList && monthViewBtn && monthViewBtn.classList) {
         jornadaViewBtn.classList.toggle('active', viewType === 'jornada');
         monthViewBtn.classList.toggle('active', viewType === 'month');
     }
@@ -427,13 +442,13 @@ function switchView(viewType) {
 // Poblar filtro de equipos
 function populateTeamFilter() {
     const teamFilter = document.getElementById('teamFilter');
-    if (!teamFilter || !teamsData.length) return;
+    if (!teamFilter || !calendarTeamsData.length) return;
     
     // Limpiar opciones existentes (excepto la primera)
     teamFilter.innerHTML = '<option value="">Todos los equipos</option>';
     
     // Agregar equipos
-    teamsData.forEach(team => {
+    calendarTeamsData.forEach(team => {
         const option = document.createElement('option');
         option.value = team.name;
         option.textContent = team.name;
@@ -924,6 +939,6 @@ window.calendarApp = {
     applyFilters,
     clearAllFilters,
     jornadasData: () => jornadasData,
-    teamsData: () => teamsData,
+    teamsData: () => calendarTeamsData,
     allMatches: () => allMatches
 };
